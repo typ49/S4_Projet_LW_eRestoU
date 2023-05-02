@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>eRestoU | Menus et repas</title>
+    <link rel="stylesheet" type="text/css" href="../styles/eResto.css">
+</head>
+
+<body>
+    <div id="bcContenu">
+        <header>
+            <img src="../images/logo-eRestoU.png" id="logoRestoU" alt="Logo eResto-U">
+            <aside>Le resto-U 100% digital</aside>
+            <h1>Menus et repas</h1>
+            <a href="http://www.crous-bfc.fr" target="_blank"></a>
+            <a href="http://www.univ-fcomte.fr" target="_blank"></a>
+        </header>
+        <nav>
+            <ul>
+                <li><a href="../index.html"><span>&#x2630;</span> Accueil</a></li>
+                <li><a href="#"><span>&#x2630;</span> Menus et repas</a></li>
+                <li><a href='../php/deconnexion.php'><span>&#x2630;</span> Déconnexion [dtabary]</a></li>
+            </ul>
+        </nav>
+        <main>
+            <h2>Lundi 6 Mars 2023</h2>
+            <form id="navDate" action="menu.html" method="GET">
+                <a href="menu.html?jour=3&amp;mois=3&amp;annee=2023">Jour précédent</a>
+                <a href="menu.html?jour=7&amp;mois=3&amp;annee=2023">Jour suivant</a>
+                Date :
+                <select name="jour">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6" selected>6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
+                    <option value="15">15</option>
+                    <option value="16">16</option>
+                    <option value="17">17</option>
+                    <option value="18" >18</option>
+                    <option value="19">19</option>
+                    <option value="20">20</option>
+                    <option value="21">21</option>
+                    <option value="22">22</option>
+                    <option value="23">23</option>
+                    <option value="24">24</option>
+                    <option value="25">25</option>
+                    <option value="26">26</option>
+                    <option value="27">27</option>
+                    <option value="28">28</option>
+                    <option value="29">29</option>
+                    <option value="30">30</option>
+                    <option value="31">31</option>
+                </select>
+                <select name="mois">
+                    <option value="1">janvier</option>
+                    <option value="2">février</option>
+                    <option value="3" selected>mars</option>
+                    <option value="4">avril</option>
+                    <option value="5">mai</option>
+                    <option value="6">juin</option>
+                    <option value="7">juillet</option>
+                    <option value="8">août</option>
+                    <option value="9">septembre</option>
+                    <option value="10">octobre</option>
+                    <option value="11">novembre</option>
+                    <option value="12">décembre</option>
+                </select>
+                <select name="annee">
+                    <option value="2022">2022</option>
+                    <option value="2023" selected>2023</option>
+                </select>
+                <input type="submit" value="Consulter">
+            </form>
+
+            <p class="notice">
+                <img src="../images/notice.png" alt="notice" width="50" height="48">
+                Tous les plateaux sont composés avec un verre, un couteau, une fouchette et une petite cuillère.
+            </p>
+
+            <form method="GET" action="validation.html">
+                <input type="hidden" name="dateCommande" value="2023-03-06">
+                <input type="hidden" name="idUsager" value="8">
+                <section class="bcChoix">
+                    <h3>Entrée</h3>
+                    <input id="radEntreeA" name="radEntree" type="radio" value="aucune">
+                    <label for="radEntreeA">
+                        <img src="../images/repas/0.jpg" alt="Pas d'entrée" title="Pas d'entrée">Pas d'entrée
+                    </label>
+                    <input id="radEntreeC" name="radEntree" type="radio" value="carottes" checked>
+                    <label for="radEntreeC">
+                        <img src="../images/repas/1.jpg" alt="Salade de carottes" title="Salade de carottes">Salade de carottes<br><span>0.08kg eqCO2 / 55kcal</span>
+                    </label>
+                    <input id="radEntreeS" name="radEntree" type="radio" value="coleslaw">
+                    <label for="radEntreeS">
+                        <img src="../images/repas/7.jpg" alt="Salade de coleslaw" title="Salade de coleslaw">Salade de coleslaw<br><span>0.09kg eqCO2 / 95kcal</span>
+                    </label>
+                    <input id="radEntreeP" name="radEntree" type="radio" value="piemontaise">
+                    <label for="radEntreeP">
+                        <img src="../images/repas/8.jpg" alt="Salade piémontaise" title="Salade piémontaise">Salade piémontaise<br><span>0.24kg eqCO2 / 115kcal</span>
+                    </label>
+                </section>
+                <section class="bcChoix">
+                    <h3>Plat</h3>
+                    <input id="radPlatA" name="radPlat" type="radio" value="aucun">
+                    <label for="radPlatA">
+                        <img src="../images/repas/0.jpg" alt="Pas de plat" title="Pas de plat">Pas de plat
+                    </label>
+                    <input id="radPlatR" name="radPlat" type="radio" value="roti">
+                    <label for="radPlatR">
+                        <img src="../images/repas/18.jpg" alt="Rôti de porc" title="Rôti de porc">Rôti de porc<br><span>1kg eqCO2 / 125kcal</span>
+                    </label>
+                    <input id="radPlatD" name="radPlat" type="radio" value="daurade" checked>
+                    <label for="radPlatD">
+                        <img src="../images/repas/23.jpg" alt="Daurade" title="Daurade">Daurade<br><span>0.7kg eqCO2 / 100kcal</span>
+                    </label>
+                </section>
+                <section class="bcChoix">
+                    <h3>Accompagnement(s)</h3>
+                    <input id="cbFrites" name="cbFrites" type="checkbox" value="1">
+                    <label for="cbFrites">
+                        <img src="../images/repas/30.jpg" alt="Frites" title="Frites">Frites<br><span>0.18kg eqCO2 / 240kcal</span>
+                    </label>
+                    <input id="cbGratin" name="cbGratin" type="checkbox" value="1" checked>
+                    <label for="cbGratin">
+                        <img src="../images/repas/32.jpg" alt="Gratin dauphinois" title="Gratin dauphinois">Gratin dauphinois<br><span>0.24kg eqCO2 / 200kcal</span>
+                    </label>
+                    <input id="cbLegumes" name="cbLegumes" type="checkbox" value="1">
+                    <label for="cbLegumes">
+                        <img src="../images/repas/33.jpg" alt="Julienne de légumes" title="Julienne de légumes">Julienne de légumes<br><span>0.22kg eqCO2 / 45kcal</span>
+                    </label>
+                </section>
+                <section class="bcChoix">
+                    <h3>Fromage/dessert</h3>
+                    <input id="radDessertA" name="radDessert" type="radio" value="aucun">
+                    <label for="radDessertA">
+                        <img src="../images/repas/0.jpg" alt="Pas de fromage/déssert" title="Pas de fromage/déssert">Pas de fromage/déssert
+                    </label>
+                    <input id="radDessertY" name="radDessert" type="radio" value="yahourt">
+                    <label for="radDessertY">
+                        <img src="../images/repas/40.jpg" alt="Yahourt bio" title="Yahourt bio">Yahourt bio<br><span>0.27kg eqCO2 / 45kcal</span>
+                    </label>
+                    <input id="radDessertM" name="radDessert" type="radio" value="morbier" checked>
+                    <label for="radDessertM">
+                        <img src="../images/repas/47.jpg" alt="Part de morbier" title="Part de morbier">Part de morbier<br><span>0.18kg eqCO2 / 104kcal</span>
+                    </label>
+                    <input id="radDessertC" name="radDessert" type="radio" value="chevre">
+                    <label for="radDessertC">
+                        <img src="../images/repas/48.jpg" alt="Fromage de chèvre" title="Fromage de chèvre">Fromage de chèvre<br><span>0.23kg eqCO2 / 90kcal</span>
+                    </label>
+                </section>
+                <section class="bcChoix">
+                    <h3>Boisson</h3>
+                    <input id="radBoissonE" name="radBoisson" type="radio" value="eau">
+                    <label for="radBoissonE">
+                        <img src="../images/repas/34.jpg" alt="Carafe d'eau" title="Carafe d'eau">Carafe d'eau<br><span>0.01kg eqCO2 / 0kcal</span>
+                    </label>
+                    <input id="radBoissonC" name="radBoisson" type="radio" value="coca" checked>
+                    <label for="radBoissonC">
+                        <img src="../images/repas/35.jpg" alt="Soda au cola" title="Soda au cola">Soda au cola<br><span>0.15kg eqCO2 / 140kcal</span>
+                    </label>
+                    <input id="radBoissonF" name="radBoisson" type="radio" value="fanta">
+                    <label for="radBoissonF">
+                        <img src="../images/repas/36.jpg" alt="Soda à l'orange" title="Soda à l'orange">Soda à l'orange<br><span>0.15kg eqCO2 / 62kcal</span>
+                    </label>
+                    <input id="radBoissonS" name="radBoisson" type="radio" value="sprite">
+                    <label for="radBoissonS">
+                        <img src="../images/repas/37.jpg" alt="Soda au citron" title="Soda au citron">Soda au citron<br><span>0.15kg eqCO2 / 85kcal</span>
+                    </label>
+                </section>
+                <section class="bcChoix">
+                    <h3>Suppléments</h3>
+                    <label>
+                        <img src="../images/repas/38.jpg" alt="Pain" title="Pain">Pain
+                        <input type="number" min="0" max="2" name="nbPains" value="0">
+                    </label>
+                    <label>
+                        <img src="../images/repas/39.jpg" alt="Serviette en papier" title="Serviette en papier">Serviette en papier
+                        <input type="number" min="1" max="5" name="nbServiettes" value="1">
+                    </label>
+                </section>
+                <section>
+                    <h3>Validation</h3>
+                        <p class="attention">
+                            <img src="../images/attention.png" alt="attention" width="50" height="50">
+                            Attention, une fois la commande réalisée, il n'est pas possible de la modifier.<br>
+                            Toute commande non-récupérée sera majorée d'une somme forfaitaire de 10 euros.
+                        </p>
+                        <p class="center">
+                            <input type="submit" name="btnCommander" value="Commander">
+                            <input type="reset" name="btnAnnuler" value="Annuler">
+                        </p>
+                </section>
+            </form>
+
+            <h4 id="commentaires">Commentaires sur ce menu</h4>
+            <p>Note moyenne de ce menu : 2/5 sur la base de 2 commentaires</p>
+            <article>
+                <img src="../upload/20230306_1.jpg" alt="Photo illustrant le commentaire">
+                <h5>Commentaire de Frédéric Dadeau, publié le 6 mars 2023 à 11h58</h5>
+                <p>Pas à la hauteur de mes hautes espérances....</p>
+                <footer>Note : 1 / 5</footer>
+            </article>
+            <article>
+                <h5>Commentaire d'Éric Merlet, publié le 6 mars 2023 à 11h47</h5>
+                <p>J'ai bien aimé, mais la viande manquait un peu de cuisson.</p>
+                <footer>Note : 3 / 5</footer>
+            </article>
+        </main>
+        <footer>&copy; Licence Informatique - Février 2023 - Université de Franche-Comté - CROUS de Franche-Comté</footer>
+    </div>
+</body>
+
+</html>

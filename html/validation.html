@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>eRestoU | Accueil</title>
+    <link rel="stylesheet" type="text/css" href="../styles/eResto.css">
+    <script>
+
+document.addEventListener("DOMContentLoaded", function() {
+
+    const data = {};
+    decodeURI(document.location.search.substring(1)).split("&").forEach(function(e) {
+        data[e.split("=")[0]] = e.split("=")[1];
+    });
+    console.log(data);
+
+    
+    // erreurs relevées
+    var errors = [];
+    
+    // fonction de vérification d'un bouton radio
+    function verifierRadio(nom, valeurs) {
+        if (data[nom] === undefined) {
+            errors.push("Le champ <i>" + nom + "</i> n'existe pas.");       
+        }   
+        else {
+            var valeur = data[nom];
+            if (!valeur) {
+                errors.push("Le champ <i>" + nom + "</i> n'est pas renseigné.");       
+            }
+            else {
+                if (valeurs.indexOf(valeur) < 0) {
+                    errors.push("La valeur du champ <i>" + nom + "</i> ne correspond pas à une des valeurs attendues (<i>" + valeur + "</i> vs. <i>" + valeurs.join("</i>,<i>") + "</i>)");
+                }
+            }
+        }
+    }
+
+    // verification d'une checkbox (valeur attendue)
+    function verifierCheckbox(nom, attendu) {
+        if (data[nom] !== undefined) {
+            if (! data[nom]){
+                errors.push("Le champ <i>" + nom + "</i> n'est pas renseigné.");
+            }
+            else if (data[nom] != attendu) {
+                errors.push("La valeur du champ <i>" + nom + "</i> ne correspond pas à la valeur attendue (<i>" + data[nom] + "</i> vs. <i>" + attendu + "</i>)");
+            }
+            return 1;
+        }
+        return 0;
+    }
+    
+    // verification d'un type number 
+    function verifierNombre(nom, min, max) {
+        if (data[nom] === undefined) {
+            errors.push("Le champ <i>" + nom + "</i> n'existe pas.");       
+        } 
+        else {
+            if (! data[nom]){
+                errors.push("Le champ <i>" + nom + "</i> n'est pas renseigné.");
+            }
+            else {
+                var valeur = Number(data[nom]);
+                if (isNaN(valeur)){
+                    errors.push("La valeur du champ <i>" + nom + "</i> n'est pas un nombre");
+                }
+                else if (valeur < min || valeur > max) {
+                    errors.push("La valeur du champ <i>" + nom + "</i> n'est pas dans l'intervalle attendu [" + min + " ; " + max + "]");
+                }
+            }
+        }
+    }
+    
+     // verification d'un type texte
+    function verifierTexte(nom, pattern) {
+        if (data[nom] === undefined) {
+            errors.push("Le champ <i>" + nom + "</i> n'existe pas.");       
+        } 
+        else {
+            var valeur = data[nom];
+            if (!valeur) {
+                errors.push("Le champ <i>" + nom + "</i> n'est pas renseigné.");       
+            }
+            else {
+                if (!valeur.match(pattern)) {
+                    errors.push("La valeur du champ <i>" + nom + "</i> (" + valeur + ") ne respecte pas le format attendu.");
+                }
+            }
+        }
+    }
+    
+    
+    verifierTexte("dateCommande", "[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}");
+    verifierTexte("numEtudiant", "[0-9]{8,10}");
+    verifierRadio("radEntree", ["aucune", "carottes", "piemontaise", "coleslaw"]);
+    verifierRadio("radPlat", ["aucun", "roti", "daurade"]);
+    var nbAccompagnements = 0
+    nbAccompagnements += verifierCheckbox("cbGratin", "1");
+    nbAccompagnements += verifierCheckbox("cbLegumes", "1");
+    nbAccompagnements += verifierCheckbox("cbFrites", "1");
+    if (nbAccompagnements == 0){
+        errors.push("Il faut choisir au moins un accompagnement.");
+    }
+    verifierRadio("radDessert", ["aucun", "morbier", "chevre", "yahourt"]);
+    verifierRadio("radBoisson", ["eau", "coca", "fanta", "sprite"]);
+    verifierNombre("nbPains", 0, 2);
+    verifierNombre("nbServiettes", 1, 5);
+    verifierTexte("btnCommander", "Commander");
+    
+    if (errors.length == 0) {
+        document.querySelector("main").innerHTML = "<p>Votre commande a bien été enregistrée.</p><p style='min-height: 300px;'><a href='menu.html'>Retour au menu</a></p>";   
+    }
+    else {
+        document.querySelector("main").innerHTML = "<p>Le formulaire comporte les erreurs suivantes : </p><ul style='min-height: 400px; padding: 0px 0 50px 0; list-style-type: disc;'><li>" + errors.join("</li><li>") + "</li></ul><p><a href='menu.html'>Retour au menu</a></p>";   
+    }
+    
+});
+    </script>
+</head>
+
+<body>
+    <div id="bcContenu">
+        <header>
+            <img src="../images/logo-eRestoU.png" id="logoRestoU" alt="Logo eResto-U">
+            <aside>Le resto-U 100% digital</aside>
+            <h1>Validation de votre commande</h1>
+            <a href="http://www.crous-bfc.fr" target="_blank"></a>
+            <a href="http://www.univ-fcomte.fr" target="_blank"></a>
+        </header>
+        <nav>
+            <ul>
+                <li><a href="../index.html"><span>&#x2630;</span> Accueil</a></li>
+                <li><a href="./menu.html"><span>&#x2630;</span> Menus et repas</a></li>
+                <li><a href='../php/deconnexion.php'><span>&#x2630;</span> Déconnexion [dtabary]</a></li>
+            </ul>
+        </nav>
+        <main>
+           
+        </main>
+        <footer>&copy; Licence Informatique - Février 2023 - Université de Franche-Comté - CROUS de Franche-Comté</footer>
+    </div>
+</body>
+    
+</html>

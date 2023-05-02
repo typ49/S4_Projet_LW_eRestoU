@@ -1,0 +1,596 @@
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+
+/** -- DEBUT DE LA FEUILLE DE STYLE -- **/
+
+body {
+    font-family: arial, verdana, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    --color1: #e61a23;
+    background-color: lightgrey;
+}
+
+#bcContenu {
+    margin: 0 auto;
+    width: 960px;
+    background-color: white;
+}
+
+a, a:visited {
+    text-decoration: none;
+    color: var(--color1);
+}
+a:hover {
+    text-decoration: underline;   
+}
+
+h3 {
+    padding-top: 10px;
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--color1);
+    border-bottom: solid 2px var(--color1);
+}
+h4 {
+    margin: 30px 0 0 0;
+    font-weight: bold;
+    font-size: 18px;
+    text-decoration: underline;
+}
+
+strong {
+    font-weight: bold; 
+    color: var(--color1);
+}
+
+p > a[href^=http]:hover {
+    padding-right: 20px;
+    background-image: url(../images/lien_externe.gif);
+    background-position: center right;
+    background-repeat: no-repeat;
+}
+
+/** Entête **/
+
+#bcContenu > header {
+    position: relative;
+    height: 300px;
+    background: transparent url(../images/header.jpg);
+}
+
+#bcContenu > header > * {
+    position: absolute;
+}
+
+h1 {
+    color: #000;
+    bottom: 0px;
+    text-shadow: 2px 2px 5px #FFF;
+    font-size: 32px;
+    margin: 20px 10px 20px 20px;
+    font-weight: bold;
+}
+
+#logoRestoU {
+    width: 500px;
+    height: 100px;
+    top: 30px;
+    left: 10px;
+}   
+#bcContenu > header > aside {
+    top: 160px;
+    left: 10px;
+    font-size: 20px;
+    font-style: italic;
+}
+#bcContenu > header > a:nth-of-type(1) {
+    right: 10px;
+    top: 10px;
+    width: 90px;
+    height: 90px;
+    background: transparent url("../images/logo-Crous-BFC.png") no-repeat;
+}
+#bcContenu > header > a:nth-of-type(2) {
+    right: 10px;
+    bottom: 10px;
+    width: 200px;
+    height: 55px;
+    background: transparent url("../images/logo-UFC.png") no-repeat;
+}
+
+/** Menu **/
+
+nav {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 10000;
+    background-color: var(--color1);
+    padding: 5px 0;
+    border-radius: 0 0 10px 10px;
+}
+
+nav a, nav a:visited {
+    color: white;
+    position: relative;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 18px;
+}
+nav a:hover {
+    text-decoration: none;
+}
+nav a > span {
+    visibility: hidden;
+}
+nav a:hover > span {
+    visibility: visible;
+}
+
+nav li {
+    display: inline-block;
+    width: 18%;
+    text-align: center;
+    padding: 0 20px 0 30px;
+}
+
+nav li:last-child {
+    float: right;
+    text-align: right;
+    width: 300px;
+    padding-right: 20px;
+}
+
+/** Contenu de la page **/
+
+main > *{
+    padding: 10px;
+}
+
+section p {
+    margin: 10px 5px;
+}
+
+p:last-of-type {
+    margin-bottom: 0;
+}
+
+#background {
+    height: 434px;
+    background-image: url(../images/resto-u.jpg);
+    background-attachment: fixed;
+    background-size: 960px;
+    background-repeat: no-repeat;
+    background-position: center 60%;
+}
+
+
+ol {
+    list-style-type: decimal;
+    padding-bottom: 5px;
+}
+
+*:not(nav) > ul > li, ol > li {
+    margin: 10px 0 5px 40px;
+}
+*:not(nav) > ul > li {
+    padding-left: 5px;
+}
+    
+*:not(nav) > ul {
+    list-style-type: "\1F44D";
+}
+
+section[id] {
+    padding-top: 40px;
+    margin-top: -40px;
+}
+
+abbr {
+    cursor: default;   
+}
+
+/** Zone de description des différentes technologies **/
+
+.technos {
+    position: relative;
+    height: 200px;
+}
+.technos > img {
+    position: absolute;
+}
+#logoHTML {
+    top: 5%;
+    left: 5%;
+    width: 86px;
+    height: 120px;
+}
+#logoCSS {
+    top: 30%;
+    left: 17%;
+    width: 85px;
+    height: 120px;
+}
+#logoJS {
+    top: 10%;
+    left: 30%;
+    width: 120px;
+    height: 120px;
+}
+#logoAJAX {
+    bottom: 10%;
+    left: 40%;
+    width: 146px;
+    height: 70px;
+}
+#logoPHP {
+    top: 25%;
+    right: 35%;
+    width: 130px;
+    height: 70px;
+}
+#logoMySQL {
+    bottom: 15%;
+    right: 25%;
+    width: 135px;
+    height: 70px;
+}
+#logoPWA {
+    top: 30%;
+    right: 2%;
+    width: 186px;
+    height: 70px;
+}
+
+/** Zone contenant les 3 liens de navigation intra-page (carrés gris) **/ 
+.liens {
+    margin: 0;
+    padding: 20px;
+}
+
+.liens a {
+    display: inline-block;
+    width: 240px;
+    height: 240px;
+    line-height: 240px;
+    font-size: 25px;
+    font-weight: bold;
+    color: black;
+    text-align: center;
+    background: radial-gradient(white, lightgrey);
+    margin: 10px 33px;
+    box-shadow: 5px 5px 5px grey;
+}
+.liens a span{
+    display: inline-block;
+    vertical-align: middle; /* nécessite un display inline */
+    line-height: 1.5; /* nécessite un display block */
+}
+.liens a:hover {
+    text-decoration: none; 
+    background: radial-gradient(#FFAAAA, var(--color1));
+    color: white;
+    box-shadow: 5px 5px 5px darkred;
+}
+
+
+#bcContenu > footer {
+    padding: 10px;
+    margin-top: 5px;
+    text-align: center;
+    font-size: 16px;
+    color: white;
+    background-color: var(--color1);
+}
+
+
+/** Point d'interrogation **/
+#pi + span {
+    display: none;
+}
+#pi:hover + span {
+    padding-left: 5px;
+    display: inline;
+    font-size: 80%;
+}
+
+/** Images flottantes dans le partenariat **/
+#partenariat img:nth-of-type(1) {
+    float: left; 
+    height: 80px; 
+    width: 80px;
+    margin-top: 20px; 
+    margin-right: 10px;
+}
+#partenariat img:nth-of-type(2) {
+    float: right; 
+    height: 80px; 
+    width: 179px;
+    margin-top: 10px; 
+    margin-left: 10px;
+}
+
+
+/** Table en bas de page **/
+table#bilan {
+    margin: 10px auto 20px;
+    border: solid 2px var(--color1);
+    box-shadow: 5px 5px 10px #000;
+}
+table#bilan thead {
+    background-color: var(--color1);
+    color: white;
+}
+table#bilan td, table#bilan th {
+    padding: 5px 10px;
+}
+table#bilan tr > :not(:first-child) {
+    text-align: center;
+}
+
+table#bilan td[data-check="yes"] {
+    color: green;
+}
+table#bilan td[data-check="no"] {
+    color: var(--color1);
+}
+
+/* menu.html */
+
+h2 {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+#navDate {
+    text-align: center;
+}
+
+#navDate a:first-of-type {
+    float: left;
+}
+
+#navDate a:nth-of-type(2) {
+    float: right;
+}
+
+#navDate input[type=submit]{
+    padding: 2px;
+}
+
+
+form {
+     margin: 20px 0;
+}
+
+form input[type=submit], form input[type=reset] {
+    color: black;
+    background-color: lightgrey;
+    border: solid 2px black;
+    border-radius: 5px;
+    padding: 5px;
+    margin: 0 10px;
+    font-weight: bold;
+    width: 120px;
+    font-size: 14px;
+    cursor: pointer;
+}
+form input[type=submit]:hover, form input[type=reset]:hover {
+    color: white;
+    background-color: red;
+    border: solid 2px transparent;
+}
+
+form input[type=number] {
+    margin: 5px auto;
+    display: block;
+    width: 40px;
+}
+
+form select {
+    font-size: 16px;
+}
+
+/** Blocs attention et notice **/
+
+.attention {
+    border: solid 2px red;
+    width: 75%;
+    padding: 10px;
+    border-radius: 20px;
+    margin: 20px auto;
+}
+.attention img, .notice img{
+    float: left;
+    margin-right: 10px;
+    height: auto;
+    width: 50px;
+}
+
+
+p.notice {
+    background-color: blue;
+    color: white;
+    width: 75%;
+    padding: 12px;
+    border-radius: 20px;
+    margin: 20px auto;
+}
+
+.notice img {
+    border: 2px solid white;
+    border-radius: 50%;
+}
+
+/** Choix du menu **/
+
+.bcChoix input[type=radio], .bcChoix input[type=checkbox] {
+    display: none;
+}
+
+.bcChoix > label {
+    display: inline-block;
+    width: 160px;
+    margin: 10px 20px;
+    vertical-align: top;
+    cursor: pointer;
+    border: solid 2px transparent;
+    padding: 5px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.bcChoix > label span {
+    font-size: 12px;
+}
+
+
+.bcChoix input:checked + label {
+    border: solid 2px darkgreen;
+}
+
+
+.bcChoix > label > img {
+    width: 150px;
+    display: block;
+    margin: 5px auto;
+}
+
+.center {
+    text-align:center;
+}
+
+/** Commentaires **/
+
+article {
+    background-color: #EEE;
+    border-radius: 10px;
+    margin: 10px;
+    min-height: 90px;
+}
+
+
+article h5 {
+    font-weight: bold;
+}
+
+article p {
+    font-style: italic;
+    padding: 0 20px;
+}
+
+article footer {
+   margin: 10px 0 0 0;
+}
+
+article img {
+    float: right;
+    border: solid 1px #000;
+    height: 90px;
+    width: 160px;
+}
+
+main{
+    min-height: calc(99vh - 300px - 37px - 49px);
+}
+
+.nomargin{
+    margin: 0;
+}
+
+/** Formulaire **/
+form {
+    margin: 20px 0;
+}
+
+form table {
+    margin: 10px auto;
+}
+
+form table td {
+    padding: 2px 4px;
+}
+
+form table td:first-child:not(:only-child) {
+    text-align: right;
+}
+
+form table td:only-child{
+    text-align: center;
+}
+
+
+form table tr:last-of-type > td {
+    padding-top: 20px;
+}
+
+form input[type=text], form input[type=email], form input[type=password] {
+    width: 220px;
+}
+
+.error {
+    color: red;
+    font-size: 14px;
+    font-weight: bold;
+    width: 85%;
+    margin: 10px auto;
+    border: solid 2px red;
+    padding: 5px;
+    line-height: 1.5;
+}
+
+.error ul {
+    list-style-type: "\1F61E";
+}
+
+
