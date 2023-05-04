@@ -4,9 +4,11 @@
 
 ## avancement
 
-> page inscription.php mise à mettre à jour // OVER
+### Partie Julien :
+> page inscription.php à mettre à jour -> _over_
+> page deconnexion.php faire la redirection vers la page appelante si elle existe -> _over_
 
 
-## Partie Matthieu :
+### Partie Matthieu :
 
 >connexion.php -> _in progress_
