@@ -126,7 +126,7 @@ function affNavigationDateL(int $date): void{
  *
  * @return bool                     true si le restoU est ouvert, false sinon
  */
-function bdMenuL(int $date, array &$menu) : bool {
+function bdMenuL_connect(int $date, array &$menu, array &$plat_usager) : bool {
 
     // ouverture de la connexion à la base de données
     $bd = bdConnect();
@@ -135,15 +135,17 @@ function bdMenuL(int $date, array &$menu) : bool {
     $sql = "SELECT plID, plNom, plCategorie, plCalories, plCarbone
             FROM plat LEFT JOIN menu ON (plID=mePlat AND meDate=$date)
             WHERE mePlat IS NOT NULL OR plCategorie = 'boisson'";
-
+    $sql_repas = "SELECT rePlat FROM repas WHERE reDate=$date and reUsager={$_SESSION['usID']}";
     // envoi de la requête SQL
     $res = bdSendRequest($bd, $sql);
+    $res_repas = bdSendRequest($bd, $sql_repas);
 
     // Quand le resto U est fermé, la requête précédente renvoie tous les enregistrements de la table Plat de
     // catégorie boisson : il y en a NB_CAT_BOISSON
     if (mysqli_num_rows($res) <= NB_CAT_BOISSON) {
         // libération des ressources
         mysqli_free_result($res);
+        mysqli_free_result($res_repas);
         // fermeture de la connexion au serveur de base de  données
         mysqli_close($bd);
         return false; // ==> fin de la fonction bdMenuL()
@@ -156,7 +158,73 @@ function bdMenuL(int $date, array &$menu) : bool {
                     'accompagnements'   => array(),
                     'desserts'          => array(),
                     'boissons'          => array()
-                );
+    );
+
+    // tableau associatif contenant les plats du repas de l'utilisateur
+    $repas = array();
+
+    // parcours des ressources :
+    while ($tab = mysqli_fetch_assoc($res)) {
+        switch ($tab['plCategorie']) {
+            case 'entree':
+                $menu['entrees'][] = $tab;
+                break;
+            case 'viande':
+            case 'poisson':
+                $menu['plats'][] = $tab;
+                break;
+            case 'accompagnement':
+                $menu['accompagnements'][] = $tab;
+                break;
+            case 'dessert':
+            case 'fromage':
+                $menu['desserts'][] = $tab;
+                break;
+            default:
+                $menu['boissons'][] = $tab;
+        }
+    }
+    // libération des ressources
+    mysqli_free_result($res);
+    mysqli_free_result($res_repas);
+    // fermeture de la connexion au serveur de base de  données
+    mysqli_close($bd);
+    return true;
+}
+
+function bdMenuL(int $date, array &$menu) : bool {
+
+    // ouverture de la connexion à la base de données
+    $bd = bdConnect();
+
+    // Récupération des plats qui sont proposés pour le menu (boissons incluses, divers exclus)
+    $sql = "SELECT plID, plNom, plCategorie, plCalories, plCarbone
+            FROM plat LEFT JOIN menu ON (plID=mePlat AND meDate=$date)
+            WHERE mePlat IS NOT NULL OR plCategorie = 'boisson'";
+    
+    // envoi de la requête SQL
+    $res = bdSendRequest($bd, $sql);
+    
+
+    // Quand le resto U est fermé, la requête précédente renvoie tous les enregistrements de la table Plat de
+    // catégorie boisson : il y en a NB_CAT_BOISSON
+    if (mysqli_num_rows($res) <= NB_CAT_BOISSON) {
+        // libération des ressources
+        mysqli_free_result($res);
+    
+        // fermeture de la connexion au serveur de base de  données
+        mysqli_close($bd);
+        return false; // ==> fin de la fonction bdMenuL()
+    }
+
+
+    // tableau associatif contenant les constituants du menu : un élément par section
+    $menu = array(  'entrees'           => array(),
+                    'plats'             => array(),
+                    'accompagnements'   => array(),
+                    'desserts'          => array(),
+                    'boissons'          => array()
+    );
 
     // parcours des ressources :
     while ($tab = mysqli_fetch_assoc($res)) {
@@ -190,12 +258,13 @@ function bdMenuL(int $date, array &$menu) : bool {
 /**
  * Affichage d'un des constituants du menu.
  *
- * @param  array       $p      tableau associatif contenant les informations du plat en cours d'affichage
- * @param  string      $catAff catégorie d'affichage du plat
+ * @param  array       $p               tableau associatif contenant les informations du plat en cours d'affichage
+ * @param  string      $catAff          catégorie d'affichage du plat
+ * @param  string      $is_checked      attribut checked à ajouter à la balise input
  *
  * @return void
  */
-function affPlatL(array $p, string $catAff): void {
+function affPlatL(array $p, string $catAff, string $is_checked): void {
     if ($catAff != 'accompagnements'){ //radio bonton
         $name = "rad$catAff";
         $id = "{$name}{$p['plID']}";
@@ -209,7 +278,7 @@ function affPlatL(array $p, string $catAff): void {
     // protection des sorties contre les attaques XSS
     $p['plNom'] = htmlProtegerSorties($p['plNom']);
 
-    echo    '<input id="', $id, '" name="', $name, '" type="', $type, '" value="', $p['plID'], '" disabled>',
+    echo    '<input id="', $id, '" name="', $name, '" type="', $type, '" value="', $p['plID'], '" ',$is_checked,'>',
             '<label for="', $id,'">',
                 '<img src="../images/repas/', $p['plID'], '.jpg" alt="', $p['plNom'], '" title="', $p['plNom'], '">',
                 $p['plNom'], '<br>', '<span>', $p['plCarbone'],'kg eqCO2 / ', $p['plCalories'], 'kcal</span>',
@@ -242,8 +311,14 @@ function affContenuL(): void {
 
     // menu du jour
     $menu = [];
-
-    $restoOuvert = bdMenuL($date, $menu);
+    $plat_usager = [];
+// si la session est ouverte
+    if (isset($_SESSION['usID'])){
+        $restoOuvert = bdMenuL_connect($date, $menu, $plat_usager);
+    }
+    else {
+        $restoOuvert = bdMenuL($date, $menu);
+    }
 
     if (! $restoOuvert){
         echo '<p>Aucun repas n\'est servi ce jour.</p>';
@@ -256,13 +331,17 @@ function affContenuL(): void {
                 'accompagnements'   => 'Accompagnement(s)',
                 'desserts'          => 'Fromage/dessert', 
                 'boissons'          => 'Boisson'
-                );
+    );
     
     // affichage du menu
     foreach($menu as $key => $value){
         echo '<section class="bcChoix"><h3>', $h3[$key], '</h3>';
         foreach ($value as $p) {
-            affPlatL($p, $key);
+            if ( $key == 'accompagnements' && in_array($p['plID'], $plat_usager) )
+                $is_checked = 'checked';
+            else
+                $is_checked = 'disabled';
+            affPlatL($p, $key, $is_checked);
         }
         echo '</section>';
     }
