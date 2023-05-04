@@ -147,5 +147,9 @@
     }
   },
   "active": "db1034bad9986a52",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "README.md",
+    "php/protegee.php",
+    "php/connexion.php"
+  ]
 }
