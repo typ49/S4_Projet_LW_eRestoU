@@ -264,6 +264,6 @@ function traitementInscriptionL(): array {
     $_SESSION['usLogin'] = $login;
 
     // redirection vers la page protegee.php : à modifier dans le projet !
-    header('Location: protegee.php');
+    header('Location: menu.php');
     exit(); //===> Fin du script
 }
