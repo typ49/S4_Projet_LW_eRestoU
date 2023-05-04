@@ -263,7 +263,7 @@ function traitementInscriptionL(): array {
     // Rappel : ici, elle ne rajoutera jamais d'antislash car le login ne peut contenir que des caractères alphanumériques
     $_SESSION['usLogin'] = $login;
 
-    // redirection vers la page protegee.php : à modifier dans le projet !
+    // redirection vers la page menu.php
     header('Location: menu.php');
     exit(); //===> Fin du script
 }
