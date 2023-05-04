@@ -21,7 +21,7 @@ session_start();
 
 // si l'utilisateur est déjà authentifié
 if (estAuthentifie()){
-    header ('Location: menu.php');
+    header("Location: menu.php");
     exit();
 }
 
@@ -154,8 +154,6 @@ function traitementConnexion(): bool {
     $_SESSION['usID'] = $tab['usID'];
     $_SESSION['usLogin'] = $login;
 
-
-    $referer = $_SERVER['HTTP_REFERER'] ?? 'menu.php';
-    header("Location: $referer");
+    header("Location: menu.php");
     exit();
 }
