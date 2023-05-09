@@ -314,7 +314,6 @@ function affPlatL_connect(array $p, string $catAff, array $repas): void
     if (in_array($p['plID'], $repas, true)==true) {
         $is_checked = 'checked';
     }
-    echo "$is_checked";
 
     echo '<input id="', $id, '" name="', $name, '" type="', $type, '" value="', $p['plID'], '" ', $is_checked, '>',
         '<label for="', $id, '">',
