@@ -309,17 +309,8 @@ function affPlatL_connect(array $p, string $catAff, array $repas): void
     // protection des sorties contre les attaques XSS
     $p['plNom'] = htmlProtegerSorties($p['plNom']);
 
-    // affichage de $repas
-    echo '<pre>';
-    print_r($repas);
-    echo '</pre>';
-
-    echo '<pre>';
-    print_r($p['plID']);
-    echo '</pre>';
-
     // Ajouter l'attribut "checked" si le plat a été commandé par l'utilisateur
-    $is_checked = 'unchecked';
+    $is_checked = '';
     if (in_array($p['plID'], $repas, true)==true) {
         $is_checked = 'checked';
     }
