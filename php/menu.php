@@ -297,6 +297,16 @@ function bdMenuL(int $date, array &$menu): bool
  */
 function affPlatL_connect(array $p, string $catAff, array $repas): void
 {
+    $enable = 'disabled';
+    $date = dateConsulteeL();
+    $aujourdhui = DATE_AUJOURDHUI;
+    if (is_string($date)) {
+        return;
+    }
+    if ($date==$aujourdhui) {
+        $enable='';
+    }
+
     if ($catAff != 'accompagnements') { //radio bonton
         $name = "rad$catAff";
         $id = "{$name}{$p['plID']}";
@@ -315,7 +325,7 @@ function affPlatL_connect(array $p, string $catAff, array $repas): void
         $is_checked = 'checked';
     }
 
-    echo '<input id="', $id, '" name="', $name, '" type="', $type, '" value="', $p['plID'], '" ', $is_checked, '>',
+    echo '<input id="', $id, '" name="', $name, '" type="', $type, '" value="', $p['plID'], '" ', $is_checked,' ',$enable,'>',
         '<label for="', $id, '">',
         '<img src="../images/repas/', $p['plID'], '.jpg" alt="', $p['plNom'], '" title="', $p['plNom'], '">',
         $p['plNom'], '<br>', '<span>', $p['plCarbone'], 'kg eqCO2 / ', $p['plCalories'], 'kcal</span>',
@@ -345,14 +355,9 @@ function affPlatL(array $p, string $catAff): void
     // protection des sorties contre les attaques XSS
     $p['plNom'] = htmlProtegerSorties($p['plNom']);
 
-    //affichage de $repas
-    // echo '<pre>';
-    // print_r($repas);
-    // echo '</pre>';
-
     // Ajouter l'attribut "checked" si le plat a été commandé par l'utilisateur
 
-    echo '<input id="', $id, '" name="', $name, '" type="', $type, '" value="', $p['plID'], '" >',
+    echo '<input id="', $id, '" name="', $name, '" type="', $type, '" value="', $p['plID'], '"disabled >',
         '<label for="', $id, '">',
         '<img src="../images/repas/', $p['plID'], '.jpg" alt="', $p['plNom'], '" title="', $p['plNom'], '">',
         $p['plNom'], '<br>', '<span>', $p['plCarbone'], 'kg eqCO2 / ', $p['plCalories'], 'kcal</span>',
