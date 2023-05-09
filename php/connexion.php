@@ -15,6 +15,12 @@ ob_start();
 // démarrage ou reprise de la session
 session_start();
 
+// on enregistre la page precedente :
+if (!isset($_SESSION['pagePrecedente'])){
+    $_SESSION['pagePrecedente'] = $_SERVER['HTTP_REFERER'] ?? 'menu.php';
+}
+
+
 /*------------------------- Etape 1 --------------------------------------------
 - vérifications diverses et traitement des soumissions
 ------------------------------------------------------------------------------*/
@@ -154,6 +160,7 @@ function traitementConnexion(): bool {
     $_SESSION['usID'] = $tab['usID'];
     $_SESSION['usLogin'] = $login;
 
-    header("Location: menu.php");
+    $page = $_SESSION['pagePrecedente'];
+    header("Location: $page");
     exit();
 }
