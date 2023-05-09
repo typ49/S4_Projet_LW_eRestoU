@@ -254,17 +254,16 @@ function bdMenuL(int $date, array &$menu) : bool {
     return true;
 }
 
-//_______________________________________________________________
 /**
  * Affichage d'un des constituants du menu.
  *
  * @param  array       $p               tableau associatif contenant les informations du plat en cours d'affichage
  * @param  string      $catAff          catégorie d'affichage du plat
- * @param  string      $is_checked      attribut checked à ajouter à la balise input
+ * @param  array       $plat_usager     tableau contenant les identifiants des plats commandés par l'utilisateur
  *
  * @return void
  */
-function affPlatL(array $p, string $catAff, string $is_checked): void {
+function affPlatL(array $p, string $catAff, array $plat_usager): void {
     if ($catAff != 'accompagnements'){ //radio bonton
         $name = "rad$catAff";
         $id = "{$name}{$p['plID']}";
@@ -277,6 +276,9 @@ function affPlatL(array $p, string $catAff, string $is_checked): void {
 
     // protection des sorties contre les attaques XSS
     $p['plNom'] = htmlProtegerSorties($p['plNom']);
+
+    // Ajouter l'attribut "checked" si le plat a été commandé par l'utilisateur
+    $is_checked = in_array($p['plID'], $plat_usager) ? 'checked' : '';
 
     echo    '<input id="', $id, '" name="', $name, '" type="', $type, '" value="', $p['plID'], '" ',$is_checked,'>',
             '<label for="', $id,'">',
@@ -313,6 +315,7 @@ function affContenuL(): void {
     $menu = [];
     $plat_usager = [];
 // si la session est ouverte
+    echo isset($_SESSION['usID']);
     if (isset($_SESSION['usID'])){
         $restoOuvert = bdMenuL_connect($date, $menu, $plat_usager);
     }
@@ -337,11 +340,7 @@ function affContenuL(): void {
     foreach($menu as $key => $value){
         echo '<section class="bcChoix"><h3>', $h3[$key], '</h3>';
         foreach ($value as $p) {
-            if ( $key == 'accompagnements' && in_array($p['plID'], $plat_usager) )
-                $is_checked = 'checked';
-            else
-                $is_checked = 'disabled';
-            affPlatL($p, $key, $is_checked);
+            affPlatL($p, $key, $plat_usager);
         }
         echo '</section>';
     }
