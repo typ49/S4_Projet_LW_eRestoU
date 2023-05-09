@@ -437,6 +437,23 @@ function affCommentairesL(){
     }
 }
 
+function afficheValiderCommande($date, $aujourdhui){
+    if ($date==$aujourdhui) {
+        echo '<section>',
+            '<h3>Validation</h3>',
+            '<p class="attention">',
+                '<img src="../images/attention.png" alt="attention" width="50" height="50">',
+                'Attention, une fois la commande réalisée, il n\'est pas possible de la modifier.<br>',
+                'Toute commande non-récupérée sera majorée d\'une somme forfaitaire de 10 euros.',
+            '</p>',
+            '<p class="center">',
+                '<input type="submit" name="btnCommander" value="Commander">',
+                '<input type="reset" name="btnAnnuler" value="Annuler">',
+            '</p>',
+        '</section>';
+    }
+}
+
 
 
 //_______________________________________________________________
@@ -449,6 +466,7 @@ function affContenuL(): void
 {
 
     $date = dateConsulteeL();
+    $aujourdhui = DATE_AUJOURDHUI;
 
     // si dateConsulteeL() renvoie une erreur
     if (is_string($date)) {
@@ -503,19 +521,9 @@ function affContenuL(): void
         echo '</section>';
     }
     // // affichage du bouton de validation
-    // if (isset($_SESSION['usID'])) {
-    //     echo '<section>',
-    //         '<h3>Validation</h3>',
-    //         '<p class="attention">',
-    //             '<img src="../images/attention.png" alt="attention" width="50" height="50">',
-    //             'Attention, une fois la commande réalisée, il n\'est pas possible de la modifier.<br>',
-    //             'Toute commande non-récupérée sera majorée d\'une somme forfaitaire de 10 euros.',
-    //         '</p>',
-    //         '<p class="center">',
-    //             '<input type="submit" name="btnCommander" value="Commander">',
-    //             '<input type="reset" name="btnAnnuler" value="Annuler">',
-    //         '</p>',
-    //     '</section>';
-    // }
+    if (isset($_SESSION['usID'])) {
+        afficheValiderCommande($date, $aujourdhui);
+    }
+   
     affCommentairesL();
 }
