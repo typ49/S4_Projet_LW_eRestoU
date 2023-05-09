@@ -319,28 +319,44 @@ function affCommentairesL(){
     // on récupère tout les commentaires de la date sélectionnée
     $date = dateConsulteeL();
     if(is_string($date)){
-        // TODO : gestion de l'erreur
         return;
     }
     $date = (string)$date;
 
-    $sql = "SELECT usNom, usPrenom, coUsager, coTexte, coDatePublication, coNote, coDateRepas
+    $sql = "SELECT usNom, usPrenom, coUsager, coTexte, coDatePublication, coNote, coDateRepas,
+            (SELECT COUNT(*) FROM commentaire WHERE coDateRepas LIKE '$date') AS nbCommentaires,
+            (SELECT AVG(coNote) FROM commentaire WHERE coDateRepas LIKE '$date') AS moyenne
             FROM commentaire INNER JOIN usager ON usID = coUsager 
             WHERE coDateRepas LIKE '$date' ORDER BY coDatePublication DESC";
+
+
     $bd = bdConnect();
     $res = bdSendRequest($bd, $sql);
 
     
-    while($tab = mysqli_fetch_assoc($res)){
-        //gestion des injections : 
-        $tab['coUsager'] = htmlProtegerSorties($tab['coUsager']);
-        $tab['coTexte'] = htmlProtegerSorties($tab['coTexte']);
-        $tab['coDatePublication'] = htmlProtegerSorties($tab['coDatePublication']);
-        $tab['coNote'] = htmlProtegerSorties($tab['coNote']);
-        $tab['usNom'] = htmlProtegerSorties($tab['usNom']);
-        $tab['usPrenom'] = htmlProtegerSorties($tab['usPrenom']);
+    if ($row = mysqli_fetch_assoc($res)) {
+        $moyenne = (float)$row['moyenne'];
 
-        affUnCommentaire($tab['coUsager'], $tab['coDateRepas'], $tab['coTexte'], $tab['coDatePublication'], $tab['coNote'], $tab['usNom'], $tab['usPrenom']);
+
+        $nbCommentaires = $row['nbCommentaires'];
+
+        $pluriel = ($nbCommentaires > 1)? "s" : "";
+
+        echo "<h4>Commentaire$pluriel sur ce menu</h4>", 
+            "<p>Note moyenne de ce menu : $moyenne/5 sur la base de $nbCommentaires commentaire$pluriel";
+
+
+        do {
+            //gestion des injections : 
+            $row['coUsager'] = htmlProtegerSorties($row['coUsager']);
+            $row['coTexte'] = htmlProtegerSorties($row['coTexte']);
+            $row['coDatePublication'] = htmlProtegerSorties($row['coDatePublication']);
+            $row['coNote'] = htmlProtegerSorties($row['coNote']);
+            $row['usNom'] = htmlProtegerSorties($row['usNom']);
+            $row['usPrenom'] = htmlProtegerSorties($row['usPrenom']);
+
+            affUnCommentaire($row['coUsager'], $row['coDateRepas'], $row['coTexte'], $row['coDatePublication'], $row['coNote'], $row['usNom'], $row['usPrenom']);
+        } while ($row = mysqli_fetch_assoc($res));
     }
 }
 
