@@ -160,7 +160,6 @@ function traitementConnexion(): bool {
     $_SESSION['usID'] = $tab['usID'];
     $_SESSION['usLogin'] = $login;
 
-    $page = $_SESSION['pagePrecedente'];
-    header("Location: $page");
+    header("Location: {$_SESSION['pagePrecedente']}");
     exit();
 }
