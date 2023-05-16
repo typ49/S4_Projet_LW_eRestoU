@@ -594,3 +594,36 @@ form input[type=text], form input[type=email], form input[type=password] {
 }
 
 
+.monEspace-modif-button {
+    display: none;
+}
+
+.monEspace-modif-button + form {
+    display: none;
+}
+
+.monEspace-modif-button:checked + form{
+    display: block;
+    background: rgb(236, 236, 236);
+}
+
+.monEspace-modif-label {
+    display: inline-block;
+    color: black;
+    background-color: lightgrey;
+    border: solid 2px black;
+    border-radius: 5px;
+    padding: 5px;
+    margin: 5px 0;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    width: 100%;  
+    box-sizing: border-box;  /* Ajouté pour inclure la bordure et le padding dans la largeur */
+}
+
+.monEspace-modif-label:hover{
+    color: white;
+    background-color: red;
+    border: solid 2px transparent;
+}

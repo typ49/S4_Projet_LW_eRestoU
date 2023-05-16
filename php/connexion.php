@@ -27,7 +27,7 @@ if (!isset($_SESSION['pagePrecedente'])){
 
 // si l'utilisateur est déjà authentifié
 if (estAuthentifie()){
-    header("Location: menu.php");
+    header("Location: {$_SESSION['pagePrecedente']}");
     exit();
 }
 
