@@ -15,8 +15,16 @@ affEntete('Menus et repas');
 // affichage de la barre de navigation
 affNav();
 
+// si formulaire soumis, traitement de la demande d'inscription
+if (isset($_POST['btnInscription'])) {
+    $erreurs = traitement_commande(); // ne revient pas quand les données soumises sont valides
+}
+else{
+    $erreurs = null;
+}
+// $erreur = NULL;
 // contenu de la page 
-affContenuL();
+affContenuL($erreurs);
 
 // affichage du pied de page
 affPiedDePage();
@@ -177,8 +185,8 @@ function bdMenuL_connect(int $date, array &$menu, array &$repas): bool
 
     // liste des identifiants des plats commandés par l'utilisateur
     $repas = array();
-    
-    
+
+
 
     // parcours des ressources de menu :
     while ($tab = mysqli_fetch_assoc($res)) {
@@ -303,33 +311,42 @@ function affPlatL_connect(array $p, string $catAff, array $repas): void
     if (is_string($date)) {
         return;
     }
-    if ($date==$aujourdhui) {
-        $enable='';
+    if ($date == $aujourdhui) {
+        $enable = '';
+
     }
 
     if ($catAff != 'accompagnements') { //radio bonton
-        $name = "rad$catAff";
-        $id = "{$name}{$p['plID']}";
         $type = 'radio';
     } else { //checkbox
-        $id = $name = "cb{$p['plID']}";
+
         $type = 'checkbox';
     }
+    $name = "cb$catAff";
+    $id = "{$name}{$p['plID']}";
 
     // protection des sorties contre les attaques XSS
     $p['plNom'] = htmlProtegerSorties($p['plNom']);
 
     // Ajouter l'attribut "checked" si le plat a été commandé par l'utilisateur
     $is_checked = '';
-    if (in_array($p['plID'], $repas, true)==true) {
+    if (in_array($p['plID'], $repas, true) == true) {
         $is_checked = 'checked';
     }
 
-    echo '<input id="', $id, '" name="', $name, '" type="', $type, '" value="', $p['plID'], '" ', $is_checked,' ',$enable,'>',
-        '<label for="', $id, '">',
-        '<img src="../images/repas/', $p['plID'], '.jpg" alt="', $p['plNom'], '" title="', $p['plNom'], '">',
-        $p['plNom'], '<br>', '<span>', $p['plCarbone'], 'kg eqCO2 / ', $p['plCalories'], 'kcal</span>',
-        '</label>';
+    if ($p['plID'] == 0) {
+        echo '<input id="', $id, '" name="', $name, '" type="', $type, '" value="aucune" ', $enable, '>',
+            '<label for="', $id, '">',
+            '<img src="../images/repas/', $p['plID'], '.jpg" alt="nothing" title="Pas de ', $catAff, '">Pas de ', $catAff, '<br><span></span>',
+            '</label>';
+    } else {
+
+        echo '<input id="', $id, '" name="', $name, '" type="', $type, '" value="', $p['plID'], '" ', $is_checked, ' ', $enable, '>',
+            '<label for="', $id, '">',
+            '<img src="../images/repas/', $p['plID'], '.jpg" alt="', $p['plNom'], '" title="', $p['plNom'], '">',
+            $p['plNom'], '<br>', '<span>', $p['plCarbone'], 'kg eqCO2 / ', $p['plCalories'], 'kcal</span>',
+            '</label>';
+    }
 }
 
 /**
@@ -365,7 +382,8 @@ function affPlatL(array $p, string $catAff): void
 }
 
 
-function affUnCommentaire($usager, $dateRepas, $texte, $datePublication, $note, $nom, $prenom){
+function affUnCommentaire($usager, $dateRepas, $texte, $datePublication, $note, $nom, $prenom)
+{
     $anneePublication = substr($datePublication, 0, 4);
     $moisPublication = substr($datePublication, 4, 2);
     $jourPublication = substr($datePublication, 6, 2);
@@ -373,11 +391,11 @@ function affUnCommentaire($usager, $dateRepas, $texte, $datePublication, $note, 
     $minutePublication = substr($datePublication, 10, 2);
 
     //conversion mois en lettre
-    $moisPublication = getTableauMois()[(int)$moisPublication];
+    $moisPublication = getTableauMois()[(int) $moisPublication];
 
     //on retire les 0 inutiles des jours et heures
-    $jourPublication = (int)$jourPublication;
-    $heurePublication = (int)$heurePublication;
+    $jourPublication = (int) $jourPublication;
+    $heurePublication = (int) $heurePublication;
 
 
 
@@ -385,20 +403,21 @@ function affUnCommentaire($usager, $dateRepas, $texte, $datePublication, $note, 
 
     $image = "../upload/{$dateRepas}_$usager.jpg";
     echo '<article>',
-            (is_file($image))? "<img src=\"$image\" alt=\"Photo illustrant le commentaire\">" : "",
-            "<h5>Commentaire de $prenom $nom $publication </h5>",
-            "<p> $texte </p>",
-            "<footer>Note : $note / 5</footer>",
+        (is_file($image)) ? "<img src=\"$image\" alt=\"Photo illustrant le commentaire\">" : "",
+        "<h5>Commentaire de $prenom $nom $publication </h5>",
+        "<p> $texte </p>",
+        "<footer>Note : $note / 5</footer>",
         '</article>';
 }
 
-function affCommentairesL(){
+function affCommentairesL()
+{
     // on récupère tout les commentaires de la date sélectionnée
     $date = dateConsulteeL();
-    if(is_string($date)){
+    if (is_string($date)) {
         return;
     }
-    $date = (string)$date;
+    $date = (string) $date;
 
     $sql = "SELECT usNom, usPrenom, coUsager, coTexte, coDatePublication, coNote, coDateRepas,
             (SELECT COUNT(*) FROM commentaire WHERE coDateRepas LIKE '$date') AS nbCommentaires,
@@ -410,16 +429,16 @@ function affCommentairesL(){
     $bd = bdConnect();
     $res = bdSendRequest($bd, $sql);
 
-    
+
     if ($row = mysqli_fetch_assoc($res)) {
-        $moyenne = (float)$row['moyenne'];
+        $moyenne = (float) $row['moyenne'];
 
 
         $nbCommentaires = $row['nbCommentaires'];
 
-        $pluriel = ($nbCommentaires > 1)? "s" : "";
+        $pluriel = ($nbCommentaires > 1) ? "s" : "";
 
-        echo "<h4>Commentaire$pluriel sur ce menu</h4>", 
+        echo "<h4>Commentaire$pluriel sur ce menu</h4>",
             "<p>Note moyenne de ce menu : $moyenne/5 sur la base de $nbCommentaires commentaire$pluriel";
 
 
@@ -437,23 +456,94 @@ function affCommentairesL(){
     }
 }
 
-function afficheValiderCommande($date, $aujourdhui){
-    if ($date==$aujourdhui) {
-        echo '<section>',
-            '<h3>Validation</h3>',
-            '<p class="attention">',
-                '<img src="../images/attention.png" alt="attention" width="50" height="50">',
-                'Attention, une fois la commande réalisée, il n\'est pas possible de la modifier.<br>',
-                'Toute commande non-récupérée sera majorée d\'une somme forfaitaire de 10 euros.',
+function init_form_commande($date, $aujourdhui)
+{
+    if ($date == $aujourdhui) {
+        echo '<p class="notice">',
+            '<img src="../images/notice.png" alt="notice" width="50" height="48">',
+            'Tous les plateaux sont composés avec un verre, un couteau, une fouchette et une petite cuillère.',
             '</p>',
-            '<p class="center">',
-                '<input type="submit" name="btnCommander" value="Commander">',
-                '<input type="reset" name="btnAnnuler" value="Annuler">',
-            '</p>',
-        '</section>';
+            '<form id="formCommande" action="menu.php" method="POST">',
+            '<input type="hidden" name="date" value="', $date, '">';
     }
 }
 
+function btn_valider_commande($date, $aujourdhui)
+{
+    if ($date == $aujourdhui) {
+        echo '<section>',
+            '<h3>Validation</h3>',
+            '<p class="attention">',
+            '<img src="../images/attention.png" alt="attention" width="50" height="50">',
+            'Attention, une fois la commande réalisée, il n\'est pas possible de la modifier.<br>',
+            'Toute commande non-récupérée sera majorée d\'une somme forfaitaire de 10 euros.',
+            '</p>',
+            '<p class="center">',
+            '<input type="submit" name="btnCommander" value="Commander">',
+            '<input type="reset" name="btnAnnuler" value="Annuler">',
+            '</p>',
+            '</section>',
+            '</form>';
+    }
+}
+
+function affSupplement($date, $aujourdhui)
+{
+    if ($date == $aujourdhui) {
+        echo '<section class="bcChoix">',
+            '<h3>Suppléments</h3>',
+            '<label>',
+            '<img src="../images/repas/38.jpg" alt="Pain" title="Pain">Pain',
+            '<input type="number" min="0" max="2" name="nbPains" value="0">',
+            '</label>',
+            '<label>',
+            '<img src="../images/repas/39.jpg" alt="Serviette en papier" title="Serviette en papier">Serviette en papier',
+            '<input type="number" min="1" max="5" name="nbServiettes" value="1">',
+            '</label>',
+            '</section>';
+    }
+}
+
+/**
+ * Verifie les erreur et saisie de commande et ajoute un repas dans la table repas
+ * la table repas contient les champs suivants :
+ * reDate : date du repas
+ * rePlat : identifiant du plat
+ * reUsager : identifiant de l'usager
+ * reNbPortions : nombre de portions commandées
+ * @return array<string>
+ */
+function traitement_commande(): array
+{
+    $erreur = array();
+    if (!array_key_exists("cbaccompagnements", $_POST)) {
+        $erreur[] = "Vous devez choisir au moins un accompagnement";
+    if (!array_key_exists("cbboissons", $_POST)) {
+        $erreur[] = "Vous devez choisir au moins une boisson";
+    }
+        return $erreur;
+    }
+
+    $date = DATE_AUJOURDHUI;
+    $usager = $_SESSION['usID'];
+    foreach ($_POST as $repas) {
+        if (is_array($repas)) {
+            foreach ($repas as $plat) {
+                if ($plat != 'aucune') {
+                    $sql = "INSERT INTO repas (reDate, rePlat, reUsager, reNbPortions) VALUES ($date, $plat, $usager, 1)";
+                    $bd = bdConnect();
+                    $res = bdSendRequest($bd, $sql);
+                    if (!$res) {
+                        $erreur[] = "Erreur lors de l'ajout du plat $plat";
+                    }
+                }
+            }
+        }
+    }
+
+
+    return $erreur;
+}
 
 
 //_______________________________________________________________
@@ -462,7 +552,7 @@ function afficheValiderCommande($date, $aujourdhui){
  *
  * @return void
  */
-function affContenuL(): void
+function affContenuL(?array $err): void
 {
 
     $date = dateConsulteeL();
@@ -480,10 +570,13 @@ function affContenuL(): void
 
     // Génération de la navigation entre les dates 
     affNavigationDateL($date);
-
+    foreach ($_POST as $cle => $val) {
+        echo '<li>cle = ', $cle, ', valeur = ', $val, '</li>';
+    }
     // menu du jour
     $menu = [];
     $repas = [];
+    $none = ['plID' => 0, 'plNom' => 'Pas de '];
     // si la session est ouverte
     if (isset($_SESSION['usID'])) {
         $restoOuvert = bdMenuL_connect($date, $menu, $repas);
@@ -502,13 +595,28 @@ function affContenuL(): void
         'plats' => 'Plat',
         'accompagnements' => 'Accompagnement(s)',
         'desserts' => 'Fromage/dessert',
-        'boissons' => 'Boisson'
+        'boissons' => 'Boisson',
+        'supplements' => 'Supplément(s)'
     );
-
+    if (is_array($err)) {
+        echo '<div class="error">Les erreurs suivantes ont été relevées lors de votre inscription :',
+            '<ul>';
+        foreach ($err as $e) {
+            echo '<li>', $e, '</li>';
+        }
+        echo '</ul>',
+            '</div>';
+    }
+    if (isset($_SESSION['usID'])) {
+        init_form_commande($date, $aujourdhui);
+    }
     // affichage du menu
     foreach ($menu as $key => $value) {
         echo '<section class="bcChoix"><h3>', $h3[$key], '</h3>';
         if (isset($_SESSION['usID'])) {
+            if ($date == $aujourdhui && ($key == 'entrees' || $key == 'plats' || $key == 'desserts')) {
+                affPlatL_connect($none, $key, $repas);
+            }
             foreach ($value as $p) {
                 affPlatL_connect($p, $key, $repas);
             }
@@ -522,8 +630,9 @@ function affContenuL(): void
     }
     // // affichage du bouton de validation
     if (isset($_SESSION['usID'])) {
-        afficheValiderCommande($date, $aujourdhui);
+        affSupplement($date, $aujourdhui);
+        btn_valider_commande($date, $aujourdhui);
     }
-   
+
     affCommentairesL();
 }
