@@ -18,13 +18,13 @@ affNav();
 // si formulaire soumis, traitement de la demande d'inscription
 $valid = false;
 if (isset($_POST['btnCommander'])) {
-    $erreurs = traitement_commande($valid); // ne revient pas quand les données soumises sont valides
+    $erreurs = traitement_commande(); // ne revient pas quand les données soumises sont valides
 } else {
     $erreurs = null;
 }
 // $erreur = NULL;
 // contenu de la page 
-affContenuL($erreurs, $valid);
+affContenuL($erreurs);
 
 // affichage du pied de page
 affPiedDePage();
@@ -303,7 +303,7 @@ function bdMenuL(int $date, array &$menu): bool
  *
  * @return void
  */
-function affPlatL_connect(array $p, string $catAff, array $repas): void
+function affPlatL_connect(array $p, string $catAff, array $repas, bool $valid): void
 {
     $enable = 'disabled';
     $date = dateConsulteeL();
@@ -311,7 +311,7 @@ function affPlatL_connect(array $p, string $catAff, array $repas): void
     if (is_string($date)) {
         return;
     }
-    if ($date == $aujourdhui) {
+    if ($date == $aujourdhui && $valid == false) {
         $enable = '';
 
     }
@@ -335,10 +335,12 @@ function affPlatL_connect(array $p, string $catAff, array $repas): void
     }
 
     if ($p['plID'] == 0) {
-        echo '<input id="', $id, '" name="', $name, '" type="', $type, '" value="aucune" ', $enable, '>',
-            '<label for="', $id, '">',
-            '<img src="../images/repas/', $p['plID'], '.jpg" alt="nothing" title="Pas de ', $catAff, '">Pas de ', $catAff, '<br><span></span>',
-            '</label>';
+        if ($valid == false) {
+            echo '<input id="', $id, '" name="', $name, '" type="', $type, '" value="aucune" ', $enable, '>',
+                '<label for="', $id, '">',
+                '<img src="../images/repas/', $p['plID'], '.jpg" alt="nothing" title="Pas de ', $catAff, '">Pas de ', $catAff, '<br><span></span>',
+                '</label>';
+        }
     } else {
 
         echo '<input id="', $id, '" name="', $name, '" type="', $type, '" value="', $p['plID'], '" ', $is_checked, ' ', $enable, '>',
@@ -456,9 +458,9 @@ function affCommentairesL()
     }
 }
 
-function init_form_commande($date, $aujourdhui)
+function init_form_commande($date, $aujourdhui, $valid)
 {
-    if ($date == $aujourdhui) {
+    if ($date == $aujourdhui && $valid == false) {
         echo '<p class="notice">',
             '<img src="../images/notice.png" alt="notice" width="50" height="48">',
             'Tous les plateaux sont composés avec un verre, un couteau, une fouchette et une petite cuillère.',
@@ -468,9 +470,9 @@ function init_form_commande($date, $aujourdhui)
     }
 }
 
-function btn_valider_commande($date, $aujourdhui)
+function btn_valider_commande($date, $aujourdhui, $valid)
 {
-    if ($date == $aujourdhui) {
+    if ($date == $aujourdhui && $valid == false) {
         echo '<section>',
             '<h3>Validation</h3>',
             '<p class="attention">',
@@ -487,9 +489,9 @@ function btn_valider_commande($date, $aujourdhui)
     }
 }
 
-function affSupplement($date, $aujourdhui)
+function affSupplement($date, $aujourdhui, $valid)
 {
-    if ($date == $aujourdhui) {
+    if ($date == $aujourdhui && $valid == false) {
         echo '<section class="bcChoix">',
             '<h3>Suppléments</h3>',
             '<label>',
@@ -517,7 +519,7 @@ function affSupplement($date, $aujourdhui)
  * 
  * @return array<string> Liste des erreurs rencontrées
  */
-function traitement_commande($valid): array {
+function traitement_commande(): array {
 
     // if (!parametresControle('POST', ['date', 'nbPains', 'nbServiettes', 'btnCommander'], ['date', 'cbboissons', 'cbaccompagnements', 'nbPains', 'nbServiettes', 'btnCommander', 'cbPlats', 'cbEntrees', 'cbDesserts'])) {
     //     return ['Erreur : paramètres de formulaire invalides.'];
@@ -559,7 +561,6 @@ function traitement_commande($valid): array {
         }
     }
     mysqli_close($bd);
-    $valid = true;
     return $erreurs;
 }
 
@@ -571,11 +572,25 @@ function traitement_commande($valid): array {
  *
  * @return void
  */
-function affContenuL(?array $err, bool $valid): void
+function affContenuL(?array $err): void
 {
 
+    $valid = false;
     $date = dateConsulteeL();
     $aujourdhui = DATE_AUJOURDHUI;
+
+
+    // vérification de si une commande à déjà été passée pour aujourd'hui
+    if (isset($_SESSION['usID'])) {
+        $bd = bdConnect();
+        $sql = "SELECT reDate FROM repas WHERE reDate=$aujourdhui AND reUsager={$_SESSION['usID']}";
+        $res = bdSendRequest($bd, $sql);
+        if (mysqli_num_rows($res) > 0) {
+            $valid = true;
+        }
+        mysqli_free_result($res);
+        mysqli_close($bd);
+    }
 
     // si dateConsulteeL() renvoie une erreur
     if (is_string($date)) {
@@ -589,9 +604,6 @@ function affContenuL(?array $err, bool $valid): void
 
     // Génération de la navigation entre les dates 
     affNavigationDateL($date);
-    foreach ($_POST as $cle => $val) {
-        echo '<li>cle = ', $cle, ', valeur = ', $val, '</li>';
-    }
     // menu du jour
     $menu = [];
     $repas = [];
@@ -617,7 +629,8 @@ function affContenuL(?array $err, bool $valid): void
         'boissons' => 'Boisson',
         'supplements' => 'Supplément(s)'
     );
-    if ($err != '') {
+    // afficher les erreurs
+    if ($err != null) {
         echo '<div class="error">Les erreurs suivantes ont été relevées lors de votre inscription :',
             '<ul>';
         foreach ($err as $e) {
@@ -626,18 +639,18 @@ function affContenuL(?array $err, bool $valid): void
         echo '</ul>',
             '</div>';
     }
-    if (isset($_SESSION['usID']) && $valid == false) {
-        init_form_commande($date, $aujourdhui);
+    if (isset($_SESSION['usID'])) {
+        init_form_commande($date, $aujourdhui, $valid);
     }
     // affichage du menu
     foreach ($menu as $key => $value) {
         echo '<section class="bcChoix"><h3>', $h3[$key], '</h3>';
         if (isset($_SESSION['usID'])) {
             if ($date == $aujourdhui && ($key == 'entrees' || $key == 'plats' || $key == 'desserts')) {
-                affPlatL_connect($none, $key, $repas);
+                affPlatL_connect($none, $key, $repas, $valid);
             }
             foreach ($value as $p) {
-                affPlatL_connect($p, $key, $repas);
+                affPlatL_connect($p, $key, $repas, $valid);
             }
         } else {
             foreach ($value as $p) {
@@ -648,9 +661,9 @@ function affContenuL(?array $err, bool $valid): void
         echo '</section>';
     }
     // // affichage du bouton de validation
-    if (isset($_SESSION['usID']) && $valid == false) {
-        affSupplement($date, $aujourdhui);
-        btn_valider_commande($date, $aujourdhui);
+    if (isset($_SESSION['usID'])) {
+        affSupplement($date, $aujourdhui, $valid);
+        btn_valider_commande($date, $aujourdhui, $valid);
     }
 
     affCommentairesL();
