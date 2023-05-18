@@ -16,15 +16,15 @@ affEntete('Menus et repas');
 affNav();
 
 // si formulaire soumis, traitement de la demande d'inscription
-if (isset($_POST['btnInscription'])) {
-    $erreurs = traitement_commande(); // ne revient pas quand les données soumises sont valides
-}
-else{
+$valid = false;
+if (isset($_POST['btnCommander'])) {
+    $erreurs = traitement_commande($valid); // ne revient pas quand les données soumises sont valides
+} else {
     $erreurs = null;
 }
 // $erreur = NULL;
 // contenu de la page 
-affContenuL($erreurs);
+affContenuL($erreurs, $valid);
 
 // affichage du pied de page
 affPiedDePage();
@@ -505,45 +505,64 @@ function affSupplement($date, $aujourdhui)
 }
 
 /**
- * Verifie les erreur et saisie de commande et ajoute un repas dans la table repas
- * la table repas contient les champs suivants :
+ * Vérifie les erreurs et saisies de commande et ajoute un repas dans la table repas.
+ * si un plat est commander, les portions d'accompagnement valent 1, sinon elles valent 1.5
+ * chaque plat est enregistrer la la table repas avec le nombre de portions commandées
+ * La table repas contient les champs suivants :
  * reDate : date du repas
  * rePlat : identifiant du plat
  * reUsager : identifiant de l'usager
  * reNbPortions : nombre de portions commandées
- * @return array<string>
+ * 
+ * 
+ * @return array<string> Liste des erreurs rencontrées
  */
-function traitement_commande(): array
-{
-    $erreur = array();
-    if (!array_key_exists("cbaccompagnements", $_POST)) {
-        $erreur[] = "Vous devez choisir au moins un accompagnement";
-    if (!array_key_exists("cbboissons", $_POST)) {
-        $erreur[] = "Vous devez choisir au moins une boisson";
-    }
-        return $erreur;
+function traitement_commande($valid): array {
+
+    // if (!parametresControle('POST', ['date', 'nbPains', 'nbServiettes', 'btnCommander'], ['date', 'cbboissons', 'cbaccompagnements', 'nbPains', 'nbServiettes', 'btnCommander', 'cbPlats', 'cbEntrees', 'cbDesserts'])) {
+    //     return ['Erreur : paramètres de formulaire invalides.'];
+    // }
+    $erreurs = array();
+    $date = dateConsulteeL();
+    $aujourdhui = DATE_AUJOURDHUI;
+    if ($date != $aujourdhui) {
+        $erreurs[] = 'Vous ne pouvez pas commander un repas pour une autre date que celle d\'aujourd\'hui';
+        return $erreurs;
     }
 
-    $date = DATE_AUJOURDHUI;
+    if (!isset($_POST["cbaccompagnements"])) {
+        $erreurs[] = 'Vous devez choisir au moins un accompagnement';
+        return $erreurs;
+    }
+
+    if (!isset($_POST["cbboissons"])) {
+        $erreurs[] = 'Vous devez choisir une boisson';
+        return $erreurs;
+    }
+
+    $date = (string) $date;
     $usager = $_SESSION['usID'];
-    foreach ($_POST as $repas) {
-        if (is_array($repas)) {
-            foreach ($repas as $plat) {
-                if ($plat != 'aucune') {
-                    $sql = "INSERT INTO repas (reDate, rePlat, reUsager, reNbPortions) VALUES ($date, $plat, $usager, 1)";
-                    $bd = bdConnect();
-                    $res = bdSendRequest($bd, $sql);
-                    if (!$res) {
-                        $erreur[] = "Erreur lors de l'ajout du plat $plat";
-                    }
-                }
-            }
+    $nbPortions = array();
+    $nbPortions['cbentrees'] = ($_POST['cbentrees'] != "aucune") ? 1 : 0;
+    $nbPortions['cbplats'] = ($_POST['cbplats'] != "aucune") ? 1 : 0;
+    $nbPortions['cbdesserts'] = ($_POST['cbdesserts'] != "aucune") ? 1 : 0;
+    $nbPortions['cbboissons'] = 1;
+    $nbPortions['cbaccompagnements'] = ($_POST['cbplats'] != "aucune") ? 1 : 1.5;
+    $nbPortions['nbPains'] = $_POST['nbPains'];
+    $nbPortions['nbServiettes'] = $_POST['nbServiettes'];
+
+    $bd = bdConnect();
+    foreach ($nbPortions as $key => $value) {
+        if ($value > 0) {
+            $sql = "INSERT INTO repas (reDate, rePlat, reUsager, reNbPortions) VALUES ($date, {$_POST[$key]}, $usager, $value)";
+            bdSendRequest($bd, $sql);
         }
     }
-
-
-    return $erreur;
+    mysqli_close($bd);
+    $valid = true;
+    return $erreurs;
 }
+
 
 
 //_______________________________________________________________
@@ -552,7 +571,7 @@ function traitement_commande(): array
  *
  * @return void
  */
-function affContenuL(?array $err): void
+function affContenuL(?array $err, bool $valid): void
 {
 
     $date = dateConsulteeL();
@@ -598,7 +617,7 @@ function affContenuL(?array $err): void
         'boissons' => 'Boisson',
         'supplements' => 'Supplément(s)'
     );
-    if (is_array($err)) {
+    if ($err != '') {
         echo '<div class="error">Les erreurs suivantes ont été relevées lors de votre inscription :',
             '<ul>';
         foreach ($err as $e) {
@@ -607,7 +626,7 @@ function affContenuL(?array $err): void
         echo '</ul>',
             '</div>';
     }
-    if (isset($_SESSION['usID'])) {
+    if (isset($_SESSION['usID']) && $valid == false) {
         init_form_commande($date, $aujourdhui);
     }
     // affichage du menu
@@ -629,7 +648,7 @@ function affContenuL(?array $err): void
         echo '</section>';
     }
     // // affichage du bouton de validation
-    if (isset($_SESSION['usID'])) {
+    if (isset($_SESSION['usID']) && $valid == false) {
         affSupplement($date, $aujourdhui);
         btn_valider_commande($date, $aujourdhui);
     }
