@@ -14,17 +14,18 @@ session_start();
 affEntete('Menus et repas');
 // affichage de la barre de navigation
 affNav();
-
+$bd = bdConnect();
 // si formulaire soumis, traitement de la demande d'inscription
 $valid = false;
 if (isset($_POST['btnCommander'])) {
-    $erreurs = traitement_commande(); // ne revient pas quand les données soumises sont valides
+    $erreurs = traitement_commande($bd); // ne revient pas quand les données soumises sont valides
 } else {
     $erreurs = null;
 }
 // $erreur = NULL;
 // contenu de la page 
-affContenuL($erreurs);
+affContenuL($bd, $erreurs);
+mysqli_close($bd);
 
 // affichage du pied de page
 affPiedDePage();
@@ -131,16 +132,15 @@ function affNavigationDateL(int $date): void
 /**
  * Récupération du menu de la date affichée
  *
+ * @param mysqli    $bd             connexion à la base de données
  * @param int       $date           date affichée
  * @param array     $menu           menu de la date affichée (paramètre de sortie)
+ * @param array     $repas          liste des identifiants des plats commandés par l'utilisateur (paramètre de sortie)
  *
  * @return bool                     true si le restoU est ouvert, false sinon
  */
-function bdMenuL_connect(int $date, array &$menu, array &$repas): bool
+function bdMenuL_connect($bd, int $date, array &$menu, array &$repas): bool
 {
-
-    // ouverture de la connexion à la base de données
-    $bd = bdConnect();
 
     // Récupération des plats qui sont proposés pour le menu (boissons incluses, divers exclus)
     $sql = "SELECT plID, plNom, plCategorie, plCalories, plCarbone
@@ -168,8 +168,6 @@ function bdMenuL_connect(int $date, array &$menu, array &$repas): bool
         // libération des ressources
         mysqli_free_result($res);
         mysqli_free_result($res_repas);
-        // fermeture de la connexion au serveur de base de  données
-        mysqli_close($bd);
         return false; // ==> fin de la fonction bdMenuL()
     }
 
@@ -218,23 +216,21 @@ function bdMenuL_connect(int $date, array &$menu, array &$repas): bool
     // libération des ressources
     mysqli_free_result($res);
     mysqli_free_result($res_repas);
-    // fermeture de la connexion au serveur de base de  données
-    mysqli_close($bd);
     return true;
 }
 
 
 /**
- * Summary of bdMenuL
+ * Récupération du menu de la date affichée
+ * 
+ * @param mysqli $bd
  * @param mixed $date
  * @param mixed $menu
  * @return bool
+ *
  */
-function bdMenuL(int $date, array &$menu): bool
+function bdMenuL($bd, int $date, array &$menu): bool
 {
-
-    // ouverture de la connexion à la base de données
-    $bd = bdConnect();
 
     // Récupération des plats qui sont proposés pour le menu (boissons incluses, divers exclus)
     $sql = "SELECT plID, plNom, plCategorie, plCalories, plCarbone
@@ -252,7 +248,7 @@ function bdMenuL(int $date, array &$menu): bool
         mysqli_free_result($res);
 
         // fermeture de la connexion au serveur de base de  données
-        mysqli_close($bd);
+        
         return false; // ==> fin de la fonction bdMenuL()
     }
 
@@ -289,8 +285,6 @@ function bdMenuL(int $date, array &$menu): bool
     }
     // libération des ressources
     mysqli_free_result($res);
-    // fermeture de la connexion au serveur de base de  données
-    mysqli_close($bd);
     return true;
 }
 
@@ -412,7 +406,7 @@ function affUnCommentaire($usager, $dateRepas, $texte, $datePublication, $note, 
         '</article>';
 }
 
-function affCommentairesL()
+function affCommentairesL($bd)
 {
     // on récupère tout les commentaires de la date sélectionnée
     $date = dateConsulteeL();
@@ -427,8 +421,6 @@ function affCommentairesL()
             FROM commentaire INNER JOIN usager ON usID = coUsager 
             WHERE coDateRepas LIKE '$date' ORDER BY coDatePublication DESC";
 
-
-    $bd = bdConnect();
     $res = bdSendRequest($bd, $sql);
 
 
@@ -456,6 +448,7 @@ function affCommentairesL()
             affUnCommentaire($row['coUsager'], $row['coDateRepas'], $row['coTexte'], $row['coDatePublication'], $row['coNote'], $row['usNom'], $row['usPrenom']);
         } while ($row = mysqli_fetch_assoc($res));
     }
+    mysqli_free_result($res);
 }
 
 function init_form_commande($date, $aujourdhui, $valid)
@@ -519,11 +512,11 @@ function affSupplement($date, $aujourdhui, $valid)
  * 
  * @return array<string> Liste des erreurs rencontrées
  */
-function traitement_commande(): array {
+function traitement_commande($bd): array {
 
-    // if (!parametresControle('POST', ['date', 'nbPains', 'nbServiettes', 'btnCommander'], ['date', 'cbboissons', 'cbaccompagnements', 'nbPains', 'nbServiettes', 'btnCommander', 'cbPlats', 'cbEntrees', 'cbDesserts'])) {
-    //     return ['Erreur : paramètres de formulaire invalides.'];
-    // }
+    if (!parametresControle('POST', ['date'], ['cbentrees', 'cbplats', 'cbdesserts', 'cbboissons', 'cbaccompagnements', 'nbPains', 'nbServiettes']) == false) {
+        return array('Erreur : paramètres manquants ou invalides.');
+    }
     $erreurs = array();
     $date = dateConsulteeL();
     $aujourdhui = DATE_AUJOURDHUI;
@@ -533,12 +526,18 @@ function traitement_commande(): array {
     }
 
     if (!isset($_POST["cbaccompagnements"])) {
-        $erreurs[] = 'Vous devez choisir au moins un accompagnement';
-        return $erreurs;
+        array_push($erreurs, 'Vous devez choisir un accompagnement');
+
+        
     }
 
     if (!isset($_POST["cbboissons"])) {
-        $erreurs[] = 'Vous devez choisir une boisson';
+        array_push($erreurs, 'Vous devez choisir une boisson');
+        
+    }
+
+    //si il y a des erreurs, retourne $erreur
+    if (count($erreurs) > 0) {
         return $erreurs;
     }
 
@@ -553,14 +552,19 @@ function traitement_commande(): array {
     $nbPortions['nbPains'] = $_POST['nbPains'];
     $nbPortions['nbServiettes'] = $_POST['nbServiettes'];
 
-    $bd = bdConnect();
+    //vérifie Si l'utilisateur à déjà commander pour ce jour dans la base de données avant d'insérer
+    $sql = "SELECT reDate FROM repas WHERE reDate=$aujourdhui AND reUsager=$usager";
+    $res = bdSendRequest($bd, $sql);
+    if (mysqli_num_rows($res) > 0) {
+        return $erreurs;
+    }
     foreach ($nbPortions as $key => $value) {
         if ($value > 0) {
             $sql = "INSERT INTO repas (reDate, rePlat, reUsager, reNbPortions) VALUES ($date, {$_POST[$key]}, $usager, $value)";
             bdSendRequest($bd, $sql);
         }
     }
-    mysqli_close($bd);
+    mysqli_free_result($res);
     return $erreurs;
 }
 
@@ -572,7 +576,7 @@ function traitement_commande(): array {
  *
  * @return void
  */
-function affContenuL(?array $err): void
+function affContenuL($bd, ?array $err): void
 {
 
     $valid = false;
@@ -582,14 +586,12 @@ function affContenuL(?array $err): void
 
     // vérification de si une commande à déjà été passée pour aujourd'hui
     if (isset($_SESSION['usID'])) {
-        $bd = bdConnect();
         $sql = "SELECT reDate FROM repas WHERE reDate=$aujourdhui AND reUsager={$_SESSION['usID']}";
         $res = bdSendRequest($bd, $sql);
         if (mysqli_num_rows($res) > 0) {
             $valid = true;
         }
         mysqli_free_result($res);
-        mysqli_close($bd);
     }
 
     // si dateConsulteeL() renvoie une erreur
@@ -610,7 +612,7 @@ function affContenuL(?array $err): void
     $none = ['plID' => 0, 'plNom' => 'Pas de '];
     // si la session est ouverte
     if (isset($_SESSION['usID'])) {
-        $restoOuvert = bdMenuL_connect($date, $menu, $repas);
+        $restoOuvert = bdMenuL_connect($bd, $date, $menu, $repas);
     } else {
         $restoOuvert = bdMenuL($date, $menu);
     }
@@ -666,5 +668,5 @@ function affContenuL(?array $err): void
         btn_valider_commande($date, $aujourdhui, $valid);
     }
 
-    affCommentairesL();
+    affCommentairesL($bd);
 }
