@@ -571,6 +571,8 @@ function traitement_commande($bd): array
     }
     //calucle portions accompagnement
     $portionAcc = ($_POST['radplats'] != "aucune") ? 1 : 1.5;
+    //répartition de la portion par accompagnement selectionner
+    $portionAcc = $portionAcc / count($_POST['cbaccompagnements']);
     // ajout des accompagnements
     foreach ($_POST['cbaccompagnements'] as $value) {
         $sql = "INSERT INTO repas (reDate, rePlat, reUsager, reNbPortions) VALUES ($date, $value, $usager, $portionAcc)";
