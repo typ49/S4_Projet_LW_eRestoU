@@ -314,7 +314,7 @@ function affPlatL_connect(array $p, string $catAff, array $repas, bool $valid): 
         $name = "rad$catAff";
         $type = 'radio';
     } else { //checkbox
-        $name = "cb$catAff\[\]";
+        $name = "cbaccompagnements[]";
         $type = 'checkbox';
     }
     $id = "{$name}{$p['plID']}";
@@ -540,11 +540,11 @@ function traitement_commande($bd): array
         array_push($erreurs, 'Vous devez choisir un accompagnement');
     }
 
-    if (!isset($_POST["cbentrees"]) || !isset($_POST["cbplats"]) || !isset($_POST["cbdesserts"])) {
+    if (!isset($_POST["radentrees"]) || !isset($_POST["radplats"]) || !isset($_POST["raddesserts"])) {
         array_push($erreurs, 'Si vous ne voulez pas de entrées/plats/desserts, veuillez choisir "Pas de entrées/plats/desserts"');
     }
 
-    if (!isset($_POST["cbboissons"])) {
+    if (!isset($_POST["radboissons"])) {
         array_push($erreurs, 'Vous devez choisir une boisson');
     }
 
@@ -555,27 +555,27 @@ function traitement_commande($bd): array
 
 
     $nbPortions = array();
-    $nbPortions['rdentrees'] = ($_POST['cbentrees'] != "aucune") ? 1 : 0;
-    $nbPortions['rdplats'] = ($_POST['cbplats'] != "aucune") ? 1 : 0;
-    $nbPortions['rddesserts'] = ($_POST['cbdesserts'] != "aucune") ? 1 : 0;
-    $nbPortions['rdboissons'] = 1;
+    $nbPortions['radentrees'] = ($_POST['radentrees'] != "aucune") ? 1 : 0;
+    $nbPortions['radplats'] = ($_POST['radplats'] != "aucune") ? 1 : 0;
+    $nbPortions['raddesserts'] = ($_POST['raddesserts'] != "aucune") ? 1 : 0;
+    $nbPortions['radboissons'] = 1;
     $nbPortions['nbPains'] = $_POST['nbPains'];
     $nbPortions['nbServiettes'] = $_POST['nbServiettes'];
 
 
-    // foreach ($nbPortions as $key => $value) {
-    //     if ($value > 0) {
-    //         $sql = "INSERT INTO repas (reDate, rePlat, reUsager, reNbPortions) VALUES ($date, {$_POST[$key]}, $usager, $value)";
-    //         bdSendRequest($bd, $sql);
-    //     }
-    // }
+    foreach ($nbPortions as $key => $value) {
+        if ($value > 0) {
+            $sql = "INSERT INTO repas (reDate, rePlat, reUsager, reNbPortions) VALUES ($date, {$_POST[$key]}, $usager, $value)";
+            bdSendRequest($bd, $sql);
+        }
+    }
     //calucle portions accompagnement
-    $portionAcc = ($_POST['cbplats'] != "aucune") ? 1 : 1.5;
+    $portionAcc = ($_POST['radplats'] != "aucune") ? 1 : 1.5;
     // ajout des accompagnements
-    // foreach ($_POST['cbaccompagnements'] as $value) {
-    //     $sql = "INSERT INTO repas (reDate, rePlat, reUsager, reNbPortions) VALUES ($date, $value, $usager, $portionAcc)";
-    //     bdSendRequest($bd, $sql);
-    // }
+    foreach ($_POST['cbaccompagnements'] as $value) {
+        $sql = "INSERT INTO repas (reDate, rePlat, reUsager, reNbPortions) VALUES ($date, $value, $usager, $portionAcc)";
+        bdSendRequest($bd, $sql);
+    }
 
     mysqli_free_result($res);
     return $erreurs;
@@ -592,15 +592,13 @@ function traitement_commande($bd): array
 function affContenuL($bd, ?array $err): void
 {
 
-    //affiche le contenue de $_POST
-    foreach ($_POST as $key => $value) {
-        echo "Clé : " . $key . ", Valeur : " . $value . "<br>";
-    }
-    if (isset($_POST['cbaccompagnements'])) {
-        foreach ($_POST['cbaccompagnements'] as $value) {
-            echo "Accompagnement : " . $value . "<br>";
-        }
-    }
+    //affiche le contenue de $_POST[cbaccompagnements[]]
+    // foreach ($_POST['cbaccompagnements'] as $value) {
+    //     echo $value;
+    // }
+
+    
+    
     $valid = false;
     $date = dateConsulteeL();
     $aujourdhui = DATE_AUJOURDHUI;
