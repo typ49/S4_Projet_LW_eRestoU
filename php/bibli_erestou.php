@@ -89,7 +89,7 @@ function affNav(string $prefixe = '..'): void {
                 '<li><a href="', $prefixe, '/index.php"><span>&#x2630;</span> Accueil</a></li>',
                 '<li><a href="', $prefixe, '/php/menu.php"><span>&#x2630;</span> Menus et repas</a></li>',
                 $login !== null ?
-                "<li><a href='{$prefixe}/php/deconnexion.php'><span>&#x2630;</span> Déconnexion [{$login}]</a></li>" :
+                "<li><a href='{$prefixe}/php/mon_espace.php'><span>&#x2630;</span> Mon espace [{$login}]</a></li>" :
                 "<li><a href='{$prefixe}/php/connexion.php'><span>&#x2630;</span> Connexion</a></li>",
             '</ul>',
         '</nav>',
