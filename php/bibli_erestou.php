@@ -221,7 +221,7 @@ function affUnCommentaire($bd, $usager, $dateRepas, $texte, $datePublication, $n
     if ($isModifiable) {
         echo "<form action='./modifierCommentaire.php' id='modif' method='post'>",
         "<input type='hidden' name='dateRepas' value='$dateRepas'>",
-        "<input type='submit' name='modifier' value='modifier'>",
+        "<input type='submit' name='modifier_' value='modifier'>",
         "</form>",
         "<form action='./supprimerCommentaire.php' id='suppr' method='post'>",
         "<input type='hidden' name='dateRepas' value='$dateRepas'>",

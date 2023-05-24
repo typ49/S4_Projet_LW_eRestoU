@@ -8,14 +8,17 @@ require_once('bibli_generale.php');
 ob_start();
 
 // démarrage ou reprise de la session
-print_r($_POST);
+session_start();
 // affichage de l'entête
 affEntete('Modifier votre commentaire');
 // affichage de la barre de navigation
 affNav();
 $bd = bdConnect();
 
-afficherModifier($bd);
+affModifier($bd);
+if (isset($_POST['modifier'])) {
+    modifierCommentaire($bd);
+}
 
 affPiedDePage();
 
@@ -23,8 +26,28 @@ affPiedDePage();
 
 //_______________________________________________________________
 
+// affiche le formulaire de modification du commentaire
 function affModifier ($bd){
-    echo '<h2>Modifier votre commentaire</h2>';
-    //récupere la date du repas dans $_POST
-    $date = $_POST['dateRepas'];
+    echo '<h2>Modifier votre commentaire du '.date('d-m-Y',strtotime($_POST['dateRepas'])).'</h2>';
+    echo '<form action="" method="post">',
+    '<p><textarea name="commentaire" id="commentaire" cols="30" rows="10" placeholder="ajouter un commentaire"></textarea></p>',
+    '<p><input type="hidden" name="dateRepas" value="' . $_POST['dateRepas'] . '"></p>',
+    '<p><select name="note" id="note">',
+    '<option value="0">0</option>',
+    '<option value="1">1</option>',
+    '<option value="2">2</option>',
+    '<option value="3">3</option>',
+    '<option value="4">4</option>',
+    '<option value="5">5</option>',
+    '</select>  / 5</p>',
+    '<p><input type="submit" name="modifier" value="Modifier"></p>',
+    '</form>',
+    '<p><a href="commentaire.php">Retour</a></p>';
+}
+
+// modifie le commentaire
+function modifierCommentaire($bd){
+    $sql = 'UPDATE commentaire SET coTexte = "' . $_POST['commentaire'] . '", coNote = ' . $_POST['note'] . ' WHERE coUsager = ' . $_SESSION['usID'] . ' AND coDateRepas = "' . $_POST['dateRepas'] . '"';
+    bdSendRequest($bd, $sql);
+    header('location: commentaire.php');
 }
