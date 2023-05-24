@@ -184,7 +184,7 @@ function sessionExit(string $page = '../index.php'): void {
     exit();
 }
 
-function affUnCommentaire($usager, $dateRepas, $texte, $datePublication, $note, $nom, $prenom, $isModifiable)
+function affUnCommentaire($bd, $usager, $dateRepas, $texte, $datePublication, $note, $nom, $prenom, $isModifiable)
 {
     $anneePublication = substr($datePublication, 0, 4);
     $moisPublication = substr($datePublication, 4, 2);
@@ -192,25 +192,34 @@ function affUnCommentaire($usager, $dateRepas, $texte, $datePublication, $note, 
     $heurePublication = substr($datePublication, 8, 2);
     $minutePublication = substr($datePublication, 10, 2);
 
+    $anneeRepas = substr($dateRepas, 0, 4);
+    $moisRepas = substr($dateRepas, 4, 2);
+    $jourRepas = substr($dateRepas, 6, 2);
+
     //conversion mois en lettre
     $moisPublication = getTableauMois()[(int) $moisPublication];
+    $moisRepas = getTableauMois()[(int) $moisRepas];
 
     //on retire les 0 inutiles des jours et heures
     $jourPublication = (int) $jourPublication;
+    $jourRepas = (int) $jourRepas;
     $heurePublication = (int) $heurePublication;
+    
 
     
     
 
     $publication = "publié le $jourPublication $moisPublication $anneePublication à $heurePublication h $minutePublication";
+    $repas = "repas du $jourRepas $moisRepas $anneeRepas";
 
     $image = "../upload/{$dateRepas}_$usager.jpg";
     echo '<article>',
         (is_file($image)) ? "<img src=\"$image\" alt=\"Photo illustrant le commentaire\">" : "",
-        "<h5>Commentaire de $prenom $nom $publication </h5>",
+        "<h5>Commentaire de $prenom $nom $publication </h5><br><h5>$repas</h5>",
         "<p> $texte </p>",
-        "<footer>Note : $note / 5<br>",
-        "<form action='./modifierCommentaire.php' id='modif' method='post'>",
+        "<footer>Note : $note / 5";
+    if ($isModifiable) {
+        echo "<form action='./modifierCommentaire.php' id='modif' method='post'>",
         "<input type='hidden' name='dateRepas' value='$dateRepas'>",
         "<input type='submit' name='modifier' value='modifier'>",
         "</form>",
@@ -220,9 +229,13 @@ function affUnCommentaire($usager, $dateRepas, $texte, $datePublication, $note, 
         "</form>",
         "</footer>",
         '</article>';
+    } else {
+        echo "</footer>",
+        '</article>';
+    }
 }
 
-function affCommentairesL($bd, bool $commander, bool $isdate)
+function affCommentairesL($bd, bool $isdate)
 {
     // on récupère tout les commentaires de la date sélectionnée
     $date = dateConsulteeL();
@@ -261,7 +274,7 @@ function affCommentairesL($bd, bool $commander, bool $isdate)
                 $row['usNom'] = htmlProtegerSorties($row['usNom']);
                 $row['usPrenom'] = htmlProtegerSorties($row['usPrenom']);
 
-                affUnCommentaire($row['coUsager'], $row['coDateRepas'], $row['coTexte'], $row['coDatePublication'], $row['coNote'], $row['usNom'], $row['usPrenom'], false);
+                affUnCommentaire($bd, $row['coUsager'], $row['coDateRepas'], $row['coTexte'], $row['coDatePublication'], $row['coNote'], $row['usNom'], $row['usPrenom'], false);
             } while ($row = mysqli_fetch_assoc($res));
         }
         mysqli_free_result($res);
@@ -281,14 +294,9 @@ function affCommentairesL($bd, bool $commander, bool $isdate)
                 $row['usNom'] = htmlProtegerSorties($row['usNom']);
                 $row['usPrenom'] = htmlProtegerSorties($row['usPrenom']);
 
-                affUnCommentaire($row['coUsager'], $row['coDateRepas'], $row['coTexte'], $row['coDatePublication'], $row['coNote'], $row['usNom'], $row['usPrenom'], false);
+                affUnCommentaire($bd, $row['coUsager'], $row['coDateRepas'], $row['coTexte'], $row['coDatePublication'], $row['coNote'], $row['usNom'], $row['usPrenom'], true);
             } while ($row = mysqli_fetch_assoc($res));
         }
-    }
-
-    // affiche le lien si l'utilisateur est connecté et si il a commander
-    if ($commander == true) {
-        echo "<a href='./commentaire.php' id=\"ajouter-commentaire\">espace commentaire</a>";
     }
     
 }

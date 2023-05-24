@@ -572,5 +572,5 @@ function affContenuL($bd, ?array $err): void
         affSupplement($date, $aujourdhui, $valid);
         btn_valider_commande($date, $aujourdhui, $valid);
     }
-    affCommentairesL($bd, $valid, true);
+    affCommentairesL($bd, true);
 }

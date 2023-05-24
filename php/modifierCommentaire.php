@@ -23,27 +23,8 @@ affPiedDePage();
 
 //_______________________________________________________________
 
-function modifierCommentaire($bd, $texte, $id){
-    $sql = 'UPDATE commentaire SET coTexte = "' . $texte . '" WHERE coUsager = ' . $id . ' AND coDateRepas = "' . $_SESSION['date'] . '"';
-    $res = bdSendRequest($bd, $sql);
-    if ($res === false) {
-        echo '<p>Erreur lors de la modification du commentaire</p>';
-    } else {
-        echo '<p>Le commentaire a bien été modifié</p>';
-    }
-}
-
-function afficherModifier($bd){
-    //affiche les cookies
-    echo '<form action="" method="post">',
-    '<p><textarea name="modif" id="modif" cols="30" rows="10" placeholder="modifier votre commentaire"></textarea></p>',
-    '<p><input type="submit" value="Modifier"></p>',
-    '<p><a href="commentaire.php">Retour</a></p>',
-    '</form>';
-    if (!isset($_POST['modif'])) {
-        $_SESSION['date'] = $_POST['dateRepas'];
-        print_r($_SESSION);
-    } else {
-        modifierCommentaire($bd, $_POST['modif'], $_SESSION['usID']);
-    }
+function affModifier ($bd){
+    echo '<h2>Modifier votre commentaire</h2>';
+    //récupere la date du repas dans $_POST
+    $date = $_POST['dateRepas'];
 }

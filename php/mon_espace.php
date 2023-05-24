@@ -388,7 +388,10 @@ function affDeconnexion(){
     echo "<h2> Vous nous quittez déjà ?</h2>",
     "<section><a href=\"deconnexion.php\" id=\"mon-espace-boutton-deconnexion\">Oui &#x1F61D; !</a></section>";
 }
-
+function affCommentaire() {
+    echo "<h2> Vous avez un commentaire à nous faire ?</h2>",
+    "<section><a href=\"commentaire.php\" id=\"ajouter-commentaire\">Mon espace commentaire</a></section>";
+}
 
 function affMonEspace($erreursInfo, $erreursConnexion){
     echo "<h2> Bienvenue sur votre espace personnel !</h2>",
@@ -397,5 +400,6 @@ function affMonEspace($erreursInfo, $erreursConnexion){
     affModifConnexion($erreursConnexion);
     echo "</section><h2> Curieux de vos statistiques ?</h2>";
     affStatistiques();
+    affCommentaire();
     affDeconnexion();
 }
