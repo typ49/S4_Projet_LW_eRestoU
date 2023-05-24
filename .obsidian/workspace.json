@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "eddde98a8b0cfaa6",
+        "id": "c6269dca7d6a1eab",
         "type": "tabs",
         "children": [
           {
-            "id": "db1034bad9986a52",
+            "id": "cffde3ac6bf1afc1",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -69,7 +69,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "4258828f14b896c9",
@@ -146,11 +147,11 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "db1034bad9986a52",
+  "active": "cffde3ac6bf1afc1",
   "lastOpenFiles": [
+    "README.md",
     "upload/20230307_2.jpg",
     "php/menu2.php",
-    "README.md",
     "php/protegee.php",
     "php/connexion.php"
   ]

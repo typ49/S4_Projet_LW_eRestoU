@@ -627,3 +627,8 @@ form input[type=text], form input[type=email], form input[type=password] {
     background-color: red;
     border: solid 2px transparent;
 }
+
+.article-paragraph {
+    text-indent: 20px;
+    text-align: justify;
+}

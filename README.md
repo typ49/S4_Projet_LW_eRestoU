@@ -14,5 +14,6 @@
 ### Partie Matthieu :
 
 >connexion.php -> _over_<br>
->affichage des commentaires -> _over_
+>affichage des commentaires -> _over_<br>
+>creation d'une page utilisateur -> _TODO_
 

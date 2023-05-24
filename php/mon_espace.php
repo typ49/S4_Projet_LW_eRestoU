@@ -30,8 +30,7 @@ if (!estAuthentifie()){
 // infos personnelles
 if (isset($_POST['btnModifInfo'])) {
     $erreursInfo = traitementModifInfo();
-}
-else{
+}else{
     $erreursInfo = null;
 }
 
@@ -73,7 +72,7 @@ function affModifInfo(?array $err){
 
 
     echo 
-        '<label for="modifInfo-button" class="monEspace-modif-label">Modifier mes informations</label>',
+        '<label for="modifInfo-button" class="monEspace-modif-label">Modifier mes informations personnels</label>',
         '<section id="monEspace-modifInfoForm">';
     if (is_array($err)) {
         echo    '<div class="error">Les erreurs suivantes ont été relevées lors de votre inscription :',
@@ -85,7 +84,7 @@ function affModifInfo(?array $err){
                 '</div>';
     }
     echo
-        '<input type="checkbox" name="modifInfo-button" id="modifInfo-button" class="monEspace-modif-button"',
+        '<input type="radio" name="modif-button" id="modifInfo-button" class="monEspace-modif-button"',
             (isset($_POST['btnModifInfo']) ? 'checked' : ''),
         '>',
         '<form method="post" action="mon_espace.php">',
@@ -127,7 +126,7 @@ function affModifConnexion(?array $err){
                     '</div>';
         }
         echo
-        '<input type="checkbox" name="modifConnexion-button" id="modifConnexion-button" class="monEspace-modif-button"',
+        '<input type="radio" name="modif-button" id="modifConnexion-button" class="monEspace-modif-button"',
             (isset($_POST['btnModifConnexion']) ? 'checked' : ''),
         '>',
         '<form method="post" action="mon_espace.php">',
@@ -154,7 +153,7 @@ echo
 // traitement des demandes de modification
 
 // infos personnelles
-function traitementModifInfo() : array{
+function traitementModifInfo() : array|null{
     $login = $_SESSION['usLogin'];
     
     /* Toutes les erreurs détectées qui nécessitent une modification du code HTML sont considérées comme des tentatives de piratage 
@@ -227,16 +226,11 @@ function traitementModifInfo() : array{
     // fermeture de la connexion à la base de données
     mysqli_close($bd);
 
-    // mémorisation du login dans une variable de session (car affiché dans la barre de navigation sur toutes les pages)
-    // enregistrement dans la variable de session du login avant passage par la fonction mysqli_real_escape_string()
-    // car, d'une façon générale, celle-ci risque de rajouter des antislashs
-    // Rappel : ici, elle ne rajoutera jamais d'antislash car le login ne peut contenir que des caractères alphanumériques
-    $_SESSION['usLogin'] = $login2;
-    return $erreurs;
+    return null;
 }
 
 // info connexion 
-function traitementModifConnexion(): array {
+function traitementModifConnexion(): array|null {
     
     /* Toutes les erreurs détectées qui nécessitent une modification du code HTML sont considérées comme des tentatives de piratage 
     et donc entraînent l'appel de la fonction sessionExit() */
@@ -311,22 +305,92 @@ function traitementModifConnexion(): array {
     // fermeture de la connexion à la base de données
     mysqli_close($bd);
 
-    // mémorisation du login dans une variable de session (car affiché dans la barre de navigation sur toutes les pages)
-    // enregistrement dans la variable de session du login avant passage par la fonction mysqli_real_escape_string()
-    // car, d'une façon générale, celle-ci risque de rajouter des antislashs
-    // Rappel : ici, elle ne rajoutera jamais d'antislash car le login ne peut contenir que des caractères alphanumériques
     $_SESSION['usLogin'] = $login;
 
-    // redirection vers la page menu.php
-    header('Location: mon_espace.php');
-    exit(); //===> Fin du script
+    return null;
+}
+
+function affStatistiques() {
+    // ouverture de la connexion à la base 
+    $bd = bdConnect();
+
+    // protection des entrées
+    $login = mysqli_real_escape_string($bd, $_SESSION['usLogin']);
+
+    $sql = "SELECT 
+            (SELECT COUNT(*) FROM repas 
+                INNER JOIN usager ON reUsager = usID 
+                WHERE usLogin = '{$login}') as nbRepas,
+            (SELECT SUM(plCalories) FROM plat 
+                INNER JOIN repas ON rePlat = plID 
+                INNER JOIN usager ON usID = reUsager
+                WHERE usLogin = '{$login}') as sumCalories,
+            (SELECT SUM(plCarbone) FROM plat 
+                INNER JOIN repas ON rePlat = plID 
+                INNER JOIN usager ON usID = reUsager
+                WHERE usLogin = '{$login}') as sumCarbone,
+            (SELECT COUNT(*) FROM commentaire 
+                INNER JOIN usager ON coUsager = usID 
+                WHERE usLogin = '{$login}') as nbCommentaires,
+            (SELECT SUM(coNote) FROM commentaire 
+                INNER JOIN usager ON coUsager = usID 
+                WHERE usLogin = '{$login}') as sumNotes";
+
+    $res = bdSendRequest($bd, $sql);
+    $tab = mysqli_fetch_assoc($res);
+    $nbRepas = $tab['nbRepas'];
+    $sumCalories = $tab['sumCalories'];
+    $sumCarbone = $tab['sumCarbone'];
+    $nbCommentaires = $tab['nbCommentaires'];
+    $sumNotes = $tab['sumNotes'];
+    mysqli_free_result($res);
+
+    // fermeture de la connexion à la base de données
+    mysqli_close($bd);
+
+    if($nbCommentaires == 0) {
+        $moyenneNotes = 0;
+    }else {
+        $moyenneNotes = floatval(number_format($sumNotes / $nbCommentaires, 2));
+    }
+
+    if ($nbRepas == 0) {
+        echo "<section><p class=\"article-paragraph\">Vous n'avez pas encore pris de repas &#x1F631; ! Vous pouvez en commander dès maintenant ! Promis on ne mord pas &#x1F609;.</p></section>";
+        return;
+    }
+    $pourcentageRepasCommentes = floatval(number_format($nbCommentaires / $nbRepas * 100, 2));
+    $moyenneCalories = floatval(number_format($sumCalories / $nbRepas, 2));
+    $moyenneCarbone = floatval(number_format($sumCarbone / $nbRepas, 2));
+    
+    $phraseNbRepas = "Depuis que vous êtes inscrit, vous avez pris <strong>{$nbRepas}</strong> repas. ";
+    $phraseNbCommentaires = ($nbCommentaires == 0)? "Sur ces repas, vous n'en avez malheureusement commenté aucun. "
+        : "Sur ces repas, vous avez participé à notre communauté en en commantant <strong>{$nbCommentaires}</strong>. ";
+    $phrasePourcentRepasCommentes = "Cela correspond à <strong>{$pourcentageRepasCommentes}%</strong> de l'ensemble de vos repas. ";
+    $phraseMerci = ($pourcentageRepasCommentes > 30)? "Merci ! " : "";
+    $phraseNoteMoyenne = ($nbCommentaires == 0)? "" : "Vous avez attribué une note moyenne de <strong>{$moyenneNotes}/5</strong> à vos commentaires. ";
+    $phraseDernierParagraphe = "Comme vous le savez, nous sommes très concerné par notre impacte sur la nature et votre santé. 
+    C'est pourquoi, nous pouvons vous dire que vous avez consommé en moyenne <strong>{$moyenneCalories}kcal</strong> et 
+    regeté <strong>{$moyenneCarbone}g</strong> de CO2 dans notre atmosphère par repas. ";
+
+
+    echo "<section><p class=\"article-paragraph\">",
+    $phraseNbRepas,
+    $phraseNbCommentaires,
+    $phrasePourcentRepasCommentes,
+    $phraseMerci,
+    $phraseNoteMoyenne,
+    "</p><p class=\"article-paragraph\">",
+    $phraseDernierParagraphe,
+    "</p></section>";
 }
 
 
 function affMonEspace($erreursInfo, $erreursConnexion){
-    echo "<h2> Bienvenue sur votre espace personnel </h2>",
+    echo "<h2> Bienvenue sur votre espace personnel !</h2>",
     "<section id='monEspace-modif'>";
     affModifInfo($erreursInfo);
     affModifConnexion($erreursConnexion);
-    echo "</section>";
+    echo "</section>",
+    "<h2> Curieux de vos statistiques ?</h2>";
+    affStatistiques();
 }
