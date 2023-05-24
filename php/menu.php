@@ -34,47 +34,7 @@ affPiedDePage();
 ob_end_flush();
 
 
-//_______________________________________________________________
-/**
- * Vérifie la validité des paramètres reçus dans l'URL, renvoie la date affichée ou l'erreur détectée
- *
- * La date affichée est initialisée avec la date courante ou actuelle.
- * Les éventuels paramètres jour, mois, annee, reçus dans l'URL, permettent respectivement de modifier le jour, le mois, et l'année de la date affichée.
- *
- * @return int|string      string en cas d'erreur, int représentant la date affichée au format AAAAMMJJ sinon
- */
-function dateConsulteeL(): int|string
-{
-    if (!parametresControle('GET', [], ['jour', 'mois', 'annee'])) {
-        return 'Nom de paramètre invalide détecté dans l\'URL.';
-    }
 
-    // date d'aujourd'hui
-    list($jour, $mois, $annee) = getJourMoisAnneeFromDate(DATE_AUJOURDHUI);
-
-    // vérification si les valeurs des paramètres reçus sont des chaînes numériques entières
-    foreach ($_GET as $cle => $val) {
-        if (!estEntier($val)) {
-            return 'Valeur de paramètre non entière détectée dans l\'URL.';
-        }
-        // modification du jour, du mois ou de l'année de la date affichée
-        $$cle = (int) $val;
-    }
-
-    if ($annee < 1000 || $annee > 9999) {
-        return 'La valeur de l\'année n\'est pas sur 4 chiffres.';
-    }
-    if (!checkdate($mois, $jour, $annee)) {
-        return "La date demandée \"$jour/$mois/$annee\" n'existe pas.";
-    }
-    if ($annee < ANNEE_MIN) {
-        return 'L\'année doit être supérieure ou égale à ' . ANNEE_MIN . '.';
-    }
-    if ($annee > ANNEE_MAX) {
-        return 'L\'année doit être inférieure ou égale à ' . ANNEE_MAX . '.';
-    }
-    return $annee * 10000 + $mois * 100 + $jour;
-}
 //_______________________________________________________________
 /**
  * Génération de la navigation entre les dates
@@ -377,85 +337,6 @@ function affPlatL(array $p, string $catAff): void
         '</label>';
 }
 
-
-function affUnCommentaire($usager, $dateRepas, $texte, $datePublication, $note, $nom, $prenom)
-{
-    $anneePublication = substr($datePublication, 0, 4);
-    $moisPublication = substr($datePublication, 4, 2);
-    $jourPublication = substr($datePublication, 6, 2);
-    $heurePublication = substr($datePublication, 8, 2);
-    $minutePublication = substr($datePublication, 10, 2);
-
-    //conversion mois en lettre
-    $moisPublication = getTableauMois()[(int) $moisPublication];
-
-    //on retire les 0 inutiles des jours et heures
-    $jourPublication = (int) $jourPublication;
-    $heurePublication = (int) $heurePublication;
-
-
-
-    $publication = "publié le $jourPublication $moisPublication $anneePublication à $heurePublication h $minutePublication";
-
-    $image = "../upload/{$dateRepas}_$usager.jpg";
-    echo '<article>',
-        (is_file($image)) ? "<img src=\"$image\" alt=\"Photo illustrant le commentaire\">" : "",
-        "<h5>Commentaire de $prenom $nom $publication </h5>",
-        "<p> $texte </p>",
-        "<footer>Note : $note / 5</footer>",
-        '</article>';
-}
-
-function affCommentairesL($bd, bool $commander)
-{
-    // on récupère tout les commentaires de la date sélectionnée
-    $date = dateConsulteeL();
-    if (is_string($date)) {
-        return;
-    }
-    $date = (string) $date;
-
-    $sql = "SELECT usNom, usPrenom, coUsager, coTexte, coDatePublication, coNote, coDateRepas,
-            (SELECT COUNT(*) FROM commentaire WHERE coDateRepas LIKE '$date') AS nbCommentaires,
-            (SELECT AVG(coNote) FROM commentaire WHERE coDateRepas LIKE '$date') AS moyenne
-            FROM commentaire INNER JOIN usager ON usID = coUsager 
-            WHERE coDateRepas LIKE '$date' ORDER BY coDatePublication DESC";
-
-    $res = bdSendRequest($bd, $sql);
-
-
-    if ($row = mysqli_fetch_assoc($res)) {
-        $moyenne = floatval(number_format($row['moyenne']));
-
-
-        $nbCommentaires = $row['nbCommentaires'];
-
-        $pluriel = ($nbCommentaires > 1) ? "s" : "";
-
-        echo "<h4>Commentaire$pluriel sur ce menu</h4>",
-            "<p>Note moyenne de ce menu : $moyenne/5 sur la base de $nbCommentaires commentaire$pluriel";
-
-
-        do {
-            //gestion des injections : 
-            $row['coUsager'] = htmlProtegerSorties($row['coUsager']);
-            $row['coTexte'] = htmlProtegerSorties($row['coTexte']);
-            $row['coDatePublication'] = htmlProtegerSorties($row['coDatePublication']);
-            $row['coNote'] = htmlProtegerSorties($row['coNote']);
-            $row['usNom'] = htmlProtegerSorties($row['usNom']);
-            $row['usPrenom'] = htmlProtegerSorties($row['usPrenom']);
-
-            affUnCommentaire($row['coUsager'], $row['coDateRepas'], $row['coTexte'], $row['coDatePublication'], $row['coNote'], $row['usNom'], $row['usPrenom']);
-        } while ($row = mysqli_fetch_assoc($res));
-    }
-    mysqli_free_result($res);
-
-    // affiche le lien si l'utilisateur est connecté et si il a commander pour ce jour
-    if (isset($_SESSION['usID']) && $commander == true) {
-        echo "<a href='./commentaire.php'>ajouter un commentaire</a>";
-    }
-}
-
 function init_form_commande($date, $aujourdhui, $valid)
 {
     if ($date == $aujourdhui && $valid == false) {
@@ -606,13 +487,14 @@ function affContenuL($bd, ?array $err): void
     $aujourdhui = DATE_AUJOURDHUI;
 
 
-    // vérification de si une commande à déjà été passée pour aujourd'hui
+    // vérification de si une commande à déjà été passée
     if (isset($_SESSION['usID'])) {
-        $sql = "SELECT reDate FROM repas WHERE reDate=$aujourdhui AND reUsager={$_SESSION['usID']}";
+        $sql = "SELECT * FROM repas WHERE reDate=$date AND reUsager={$_SESSION['usID']}";
         $res = bdSendRequest($bd, $sql);
         if (mysqli_num_rows($res) > 0) {
             $valid = true;
         }
+        
         mysqli_free_result($res);
     }
 
@@ -627,6 +509,7 @@ function affContenuL($bd, ?array $err): void
     // si on arrive à ce point de l'exécution, alors la date est valide
 
     // Génération de la navigation entre les dates 
+    
     affNavigationDateL($date);
     // menu du jour
     $menu = [];
@@ -689,6 +572,5 @@ function affContenuL($bd, ?array $err): void
         affSupplement($date, $aujourdhui, $valid);
         btn_valider_commande($date, $aujourdhui, $valid);
     }
-
-    affCommentairesL($bd, $valid);
+    affCommentairesL($bd, $valid, true);
 }
