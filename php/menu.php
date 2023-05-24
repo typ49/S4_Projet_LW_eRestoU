@@ -248,7 +248,7 @@ function bdMenuL($bd, int $date, array &$menu): bool
         mysqli_free_result($res);
 
         // fermeture de la connexion au serveur de base de  données
-        
+
         return false; // ==> fin de la fonction bdMenuL()
     }
 
@@ -311,12 +311,12 @@ function affPlatL_connect(array $p, string $catAff, array $repas, bool $valid): 
     }
 
     if ($catAff != 'accompagnements') { //radio bonton
+        $name = "rad$catAff";
         $type = 'radio';
     } else { //checkbox
-
+        $name = "cb$catAff\[\]";
         $type = 'checkbox';
     }
-    $name = "cb$catAff";
     $id = "{$name}{$p['plID']}";
 
     // protection des sorties contre les attaques XSS
@@ -358,12 +358,12 @@ function affPlatL(array $p, string $catAff): void
 {
     if ($catAff != 'accompagnements') { //radio bonton
         $name = "rad$catAff";
-        $id = "{$name}{$p['plID']}";
         $type = 'radio';
     } else { //checkbox
-        $id = $name = "cb{$p['plID']}";
+        $name = "cb$catAff";
         $type = 'checkbox';
     }
+    $id = "{$name}{$p['plID']}";
 
     // protection des sorties contre les attaques XSS
     $p['plNom'] = htmlProtegerSorties($p['plNom']);
@@ -406,7 +406,7 @@ function affUnCommentaire($usager, $dateRepas, $texte, $datePublication, $note, 
         '</article>';
 }
 
-function affCommentairesL($bd)
+function affCommentairesL($bd, bool $commander)
 {
     // on récupère tout les commentaires de la date sélectionnée
     $date = dateConsulteeL();
@@ -449,6 +449,11 @@ function affCommentairesL($bd)
         } while ($row = mysqli_fetch_assoc($res));
     }
     mysqli_free_result($res);
+
+    // affiche le lien si l'utilisateur est connecté et si il a commander pour ce jour
+    if (isset($_SESSION['usID']) && $commander == true) {
+        echo "<a href='./commentaire.php'>ajouter un commentaire</a>";
+    }
 }
 
 function init_form_commande($date, $aujourdhui, $valid)
@@ -503,16 +508,12 @@ function affSupplement($date, $aujourdhui, $valid)
  * Vérifie les erreurs et saisies de commande et ajoute un repas dans la table repas.
  * si un plat est commander, les portions d'accompagnement valent 1, sinon elles valent 1.5
  * chaque plat est enregistrer la la table repas avec le nombre de portions commandées
- * La table repas contient les champs suivants :
- * reDate : date du repas
- * rePlat : identifiant du plat
- * reUsager : identifiant de l'usager
- * reNbPortions : nombre de portions commandées
  * 
  * 
  * @return array<string> Liste des erreurs rencontrées
  */
-function traitement_commande($bd): array {
+function traitement_commande($bd): array
+{
 
     if (!parametresControle('POST', ['date'], ['cbentrees', 'cbplats', 'cbdesserts', 'cbboissons', 'cbaccompagnements', 'nbPains', 'nbServiettes']) == false) {
         return array('Erreur : paramètres manquants ou invalides.');
@@ -520,37 +521,8 @@ function traitement_commande($bd): array {
     $erreurs = array();
     $date = dateConsulteeL();
     $aujourdhui = DATE_AUJOURDHUI;
-    if ($date != $aujourdhui) {
-        $erreurs[] = 'Vous ne pouvez pas commander un repas pour une autre date que celle d\'aujourd\'hui';
-        return $erreurs;
-    }
-
-    if (!isset($_POST["cbaccompagnements"])) {
-        array_push($erreurs, 'Vous devez choisir un accompagnement');
-
-        
-    }
-
-    if (!isset($_POST["cbboissons"])) {
-        array_push($erreurs, 'Vous devez choisir une boisson');
-        
-    }
-
-    //si il y a des erreurs, retourne $erreur
-    if (count($erreurs) > 0) {
-        return $erreurs;
-    }
-
     $date = (string) $date;
     $usager = $_SESSION['usID'];
-    $nbPortions = array();
-    $nbPortions['cbentrees'] = ($_POST['cbentrees'] != "aucune") ? 1 : 0;
-    $nbPortions['cbplats'] = ($_POST['cbplats'] != "aucune") ? 1 : 0;
-    $nbPortions['cbdesserts'] = ($_POST['cbdesserts'] != "aucune") ? 1 : 0;
-    $nbPortions['cbboissons'] = 1;
-    $nbPortions['cbaccompagnements'] = ($_POST['cbplats'] != "aucune") ? 1 : 1.5;
-    $nbPortions['nbPains'] = $_POST['nbPains'];
-    $nbPortions['nbServiettes'] = $_POST['nbServiettes'];
 
     //vérifie Si l'utilisateur à déjà commander pour ce jour dans la base de données avant d'insérer
     $sql = "SELECT reDate FROM repas WHERE reDate=$aujourdhui AND reUsager=$usager";
@@ -558,12 +530,53 @@ function traitement_commande($bd): array {
     if (mysqli_num_rows($res) > 0) {
         return $erreurs;
     }
-    foreach ($nbPortions as $key => $value) {
-        if ($value > 0) {
-            $sql = "INSERT INTO repas (reDate, rePlat, reUsager, reNbPortions) VALUES ($date, {$_POST[$key]}, $usager, $value)";
-            bdSendRequest($bd, $sql);
-        }
+
+    if ($date != $aujourdhui) {
+        $erreurs[] = 'Vous ne pouvez pas commander un repas pour une autre date que celle d\'aujourd\'hui';
+        return $erreurs;
     }
+
+    if (!isset($_POST["cbaccompagnements"])) {
+        array_push($erreurs, 'Vous devez choisir un accompagnement');
+    }
+
+    if (!isset($_POST["cbentrees"]) || !isset($_POST["cbplats"]) || !isset($_POST["cbdesserts"])) {
+        array_push($erreurs, 'Si vous ne voulez pas de entrées/plats/desserts, veuillez choisir "Pas de entrées/plats/desserts"');
+    }
+
+    if (!isset($_POST["cbboissons"])) {
+        array_push($erreurs, 'Vous devez choisir une boisson');
+    }
+
+    //si il y a des erreurs, retourne $erreur
+    if (count($erreurs) > 0) {
+        return $erreurs;
+    }
+
+
+    $nbPortions = array();
+    $nbPortions['rdentrees'] = ($_POST['cbentrees'] != "aucune") ? 1 : 0;
+    $nbPortions['rdplats'] = ($_POST['cbplats'] != "aucune") ? 1 : 0;
+    $nbPortions['rddesserts'] = ($_POST['cbdesserts'] != "aucune") ? 1 : 0;
+    $nbPortions['rdboissons'] = 1;
+    $nbPortions['nbPains'] = $_POST['nbPains'];
+    $nbPortions['nbServiettes'] = $_POST['nbServiettes'];
+
+
+    // foreach ($nbPortions as $key => $value) {
+    //     if ($value > 0) {
+    //         $sql = "INSERT INTO repas (reDate, rePlat, reUsager, reNbPortions) VALUES ($date, {$_POST[$key]}, $usager, $value)";
+    //         bdSendRequest($bd, $sql);
+    //     }
+    // }
+    //calucle portions accompagnement
+    $portionAcc = ($_POST['cbplats'] != "aucune") ? 1 : 1.5;
+    // ajout des accompagnements
+    // foreach ($_POST['cbaccompagnements'] as $value) {
+    //     $sql = "INSERT INTO repas (reDate, rePlat, reUsager, reNbPortions) VALUES ($date, $value, $usager, $portionAcc)";
+    //     bdSendRequest($bd, $sql);
+    // }
+
     mysqli_free_result($res);
     return $erreurs;
 }
@@ -579,6 +592,15 @@ function traitement_commande($bd): array {
 function affContenuL($bd, ?array $err): void
 {
 
+    //affiche le contenue de $_POST
+    foreach ($_POST as $key => $value) {
+        echo "Clé : " . $key . ", Valeur : " . $value . "<br>";
+    }
+    if (isset($_POST['cbaccompagnements'])) {
+        foreach ($_POST['cbaccompagnements'] as $value) {
+            echo "Accompagnement : " . $value . "<br>";
+        }
+    }
     $valid = false;
     $date = dateConsulteeL();
     $aujourdhui = DATE_AUJOURDHUI;
@@ -614,7 +636,7 @@ function affContenuL($bd, ?array $err): void
     if (isset($_SESSION['usID'])) {
         $restoOuvert = bdMenuL_connect($bd, $date, $menu, $repas);
     } else {
-        $restoOuvert = bdMenuL($date, $menu);
+        $restoOuvert = bdMenuL($bd, $date, $menu);
     }
 
     if (!$restoOuvert) {
@@ -668,5 +690,5 @@ function affContenuL($bd, ?array $err): void
         btn_valider_commande($date, $aujourdhui, $valid);
     }
 
-    affCommentairesL($bd);
+    affCommentairesL($bd, $valid);
 }
