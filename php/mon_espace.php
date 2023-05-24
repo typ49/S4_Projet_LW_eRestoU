@@ -321,11 +321,11 @@ function affStatistiques() {
             (SELECT COUNT(*) FROM repas 
                 INNER JOIN usager ON reUsager = usID 
                 WHERE usLogin = '{$login}') as nbRepas,
-            (SELECT SUM(plCalories) FROM plat 
+            (SELECT SUM(plCalories * reNbPortions) FROM plat 
                 INNER JOIN repas ON rePlat = plID 
                 INNER JOIN usager ON usID = reUsager
                 WHERE usLogin = '{$login}') as sumCalories,
-            (SELECT SUM(plCarbone) FROM plat 
+            (SELECT SUM(plCarbone * reNbPortions) FROM plat 
                 INNER JOIN repas ON rePlat = plID 
                 INNER JOIN usager ON usID = reUsager
                 WHERE usLogin = '{$login}') as sumCarbone,
