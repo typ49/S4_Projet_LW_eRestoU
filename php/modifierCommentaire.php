@@ -9,16 +9,13 @@ ob_start();
 
 // démarrage ou reprise de la session
 print_r($_POST);
-session_start();
-$dateRepas = $_POST['dateRepas'];
-echo $dateRepas;
 // affichage de l'entête
 affEntete('Modifier votre commentaire');
 // affichage de la barre de navigation
 affNav();
 $bd = bdConnect();
 
-afficherModifier($bd, $dateRepas);
+afficherModifier($bd);
 
 affPiedDePage();
 
@@ -26,9 +23,8 @@ affPiedDePage();
 
 //_______________________________________________________________
 
-function modifierCommentaire($bd, $texte, $date, $id){
-    
-    $sql = 'UPDATE commentaire SET coTexte = "' . $texte . '" WHERE coUsager = ' . $id . ' AND coDateRepas = "' . $date . '"';
+function modifierCommentaire($bd, $texte, $id){
+    $sql = 'UPDATE commentaire SET coTexte = "' . $texte . '" WHERE coUsager = ' . $id . ' AND coDateRepas = "' . $_SESSION['date'] . '"';
     $res = bdSendRequest($bd, $sql);
     if ($res === false) {
         echo '<p>Erreur lors de la modification du commentaire</p>';
@@ -37,16 +33,17 @@ function modifierCommentaire($bd, $texte, $date, $id){
     }
 }
 
-function afficherModifier($bd, $dateRepas){
+function afficherModifier($bd){
     //affiche les cookies
-    echo '<form action="" method="get">',
+    echo '<form action="" method="post">',
     '<p><textarea name="modif" id="modif" cols="30" rows="10" placeholder="modifier votre commentaire"></textarea></p>',
     '<p><input type="submit" value="Modifier"></p>',
     '<p><a href="commentaire.php">Retour</a></p>',
     '</form>';
-    echo $dateRepas;
     if (!isset($_POST['modif'])) {
+        $_SESSION['date'] = $_POST['dateRepas'];
+        print_r($_SESSION);
     } else {
-        modifierCommentaire($bd, $_POST['modif'], $dateRepas, $_SESSION['usID']);
+        modifierCommentaire($bd, $_POST['modif'], $_SESSION['usID']);
     }
 }
