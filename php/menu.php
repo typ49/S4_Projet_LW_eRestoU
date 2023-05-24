@@ -425,7 +425,7 @@ function affCommentairesL($bd, bool $commander)
 
 
     if ($row = mysqli_fetch_assoc($res)) {
-        $moyenne = (float) $row['moyenne'];
+        $moyenne = floatval(number_format($row['moyenne']));
 
 
         $nbCommentaires = $row['nbCommentaires'];
