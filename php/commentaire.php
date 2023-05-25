@@ -51,7 +51,7 @@ function ajouterCommentaire($bd, $id){
         $date[] = $tab['reDate'];
     }
     // afficher les dates de repas de l'utilisateur dans un select
-    echo '<form action="" method="post">',
+    echo '<form action="#" method="post">',
     '<p><select name="dateRepas" id="dateRepas">';
     foreach ($date as $value) {
         echo '<option value="' . $value . '">' . date('d-m-Y',strtotime($value)) . '</option>';
@@ -74,6 +74,18 @@ function ajouterCommentaire($bd, $id){
 }
 
 function traitement_commentaire($bd, $id) {
+    //vérifier piratage du texte
+    if (preg_match('/[<>]/', $_POST['commentaire'])) {
+        echo '<p>Vous avez utilisé des caractères interdits</p>';
+        return;
+    }
+    // vérifier qu'il n'y a pas déjà un commentaire pour cette date
+    $sql = 'SELECT * FROM commentaire WHERE coUsager = ' . $id . ' AND coDateRepas = "' . $_POST['dateRepas'] . '"';
+    $res = bdSendRequest($bd, $sql);
+    if (mysqli_num_rows($res) != 0) {
+        return;
+    }
+    // ajouter le commentaire
     $sql = 'INSERT INTO commentaire (coUsager, coDateRepas, coTexte, coDatePublication, coNote) VALUES (' . $id . ', "' . $_POST['dateRepas'] . '", "' . $_POST['commentaire'] . '" , "' . DATE_AUJOURDHUI . '", "' . $_POST['note'] . '" )';
     $res = bdSendRequest($bd, $sql);
     if ($res === false) {
