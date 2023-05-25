@@ -318,7 +318,7 @@ function affStatistiques() {
     $login = mysqli_real_escape_string($bd, $_SESSION['usLogin']);
 
     $sql = "SELECT 
-            (SELECT COUNT(*) FROM repas 
+            (SELECT COUNT(DISTINCT reDate) FROM repas 
                 INNER JOIN usager ON reUsager = usID 
                 WHERE usLogin = '{$login}') as nbRepas,
             (SELECT SUM(plCalories * reNbPortions) FROM plat 
