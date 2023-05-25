@@ -13,12 +13,12 @@ error_reporting( E_ALL );
 define ('IS_DEV', true);
 
 /** Constantes : les paramètres de connexion au serveur MariaDB */
-define ('BD_NAME', 'e_RestoU_bd');
-define ('BD_USER', 'e_RestoU_user');
-define ('BD_PASS', 'e_RestoU_pass');
-// define ('BD_NAME', 'merlet_erestou');
-// define ('BD_USER', 'merlet_u');
-// define ('BD_PASS', 'merlet_p');
+// define ('BD_NAME', 'e_RestoU_bd');
+// define ('BD_USER', 'e_RestoU_user');
+// define ('BD_PASS', 'e_RestoU_pass');
+define ('BD_NAME', 'gauthier_erestou');
+define ('BD_USER', 'gauthier_u');
+define ('BD_PASS', 'gauthier_p');
 define ('BD_SERVER', 'localhost');
 
 // Définit le fuseau horaire par défaut à utiliser. Disponible depuis PHP 5.1
@@ -140,12 +140,15 @@ function verifierTexte(string $texte, string $nom, array &$erreurs, ?int $long =
     }
     else {
         if(strip_tags($texte) != $texte){
+            
             $erreurs[] = "$nom ne doit pas contenir de tags HTML.";
         }
         else if ($expReg !== null && ! preg_match($expReg, $texte)){
+            
             $erreurs[] = "$nom n'est pas valide.";
         }
         if ($long !== null && mb_strlen($texte, encoding:'UTF-8') > $long){
+            
             $erreurs[] = "$nom ne peut pas dépasser $long caractères.";
         }
     }
@@ -277,6 +280,10 @@ function affCommentairesL($bd, bool $isdate)
                 affUnCommentaire($bd, $row['coUsager'], $row['coDateRepas'], $row['coTexte'], $row['coDatePublication'], $row['coNote'], $row['usNom'], $row['usPrenom'], false);
             } while ($row = mysqli_fetch_assoc($res));
         }
+        if (isset($_SESSION['usID'])) {
+            echo "<section><a href=\"commentaire.php\" id=\"ajouter-commentaire\">Mes commentaire</a></section>";
+        }
+        "<section><a href=\"commentaire.php\" id=\"ajouter-commentaire\">Mes commentaire</a></section>";
         mysqli_free_result($res);
     } else {
         echo "<h4>Mes Commentaires</h4>";

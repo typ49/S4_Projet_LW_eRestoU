@@ -389,7 +389,7 @@ function affDeconnexion(){
     "<section><a href=\"deconnexion.php\" id=\"mon-espace-boutton-deconnexion\">Oui &#x1F61D; !</a></section>";
 }
 function affCommentaire() {
-    echo "<h2> Vous avez un commentaire à nous faire ?</h2>",
+    echo "<h2> Vous avez un commentaire à nous partager ?</h2>",
     "<section><a href=\"commentaire.php\" id=\"ajouter-commentaire\">Mes commentaire</a></section>";
 }
 
