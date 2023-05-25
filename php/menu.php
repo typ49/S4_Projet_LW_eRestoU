@@ -443,22 +443,24 @@ function traitement_commande($bd): array
     $nbPortions['nbPains'] = $_POST['nbPains'];
     $nbPortions['nbServiettes'] = $_POST['nbServiettes'];
 
-
+    $sql = "INSERT INTO repas (reDate, rePlat, reUsager, reNbPortions) VALUES ";
     foreach ($nbPortions as $key => $value) {
         if ($value > 0) {
-            $sql = "INSERT INTO repas (reDate, rePlat, reUsager, reNbPortions) VALUES ($date, {$_POST[$key]}, $usager, $value)";
-            bdSendRequest($bd, $sql);
+            $sql .= "($date, {$_POST[$key]}, $usager, $value),";
+            
         }
     }
-    //calucle portions accompagnement
+
+    //calcule portions accompagnement
     $portionAcc = ($_POST['radplats'] != "aucune") ? 1 : 1.5;
     //répartition de la portion par accompagnement selectionner
     $portionAcc = $portionAcc / count($_POST['cbaccompagnements']);
     // ajout des accompagnements
     foreach ($_POST['cbaccompagnements'] as $value) {
-        $sql = "INSERT INTO repas (reDate, rePlat, reUsager, reNbPortions) VALUES ($date, $value, $usager, $portionAcc)";
-        bdSendRequest($bd, $sql);
+        $sql .= "($date, $value, $usager, $portionAcc),";
     }
+    $sql = rtrim($sql, ',');
+    bdSendRequest($bd, $sql);
 
     mysqli_free_result($res);
     return $erreurs;
