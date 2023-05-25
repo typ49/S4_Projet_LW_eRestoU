@@ -346,3 +346,29 @@ function affLigneInput(string $libelle, array $attributs = array(), string $pref
     echo '></td></tr>';
 }
 
+function resizeImage($src, $dest, $targetWidth) {
+    // Récupère les dimensions de l'image
+    list($originalWidth, $originalHeight) = getimagesize($src);
+
+    // Calcule la nouvelle hauteur en conservant le ratio de l'image
+    $newHeight = ($targetWidth / $originalWidth) * $originalHeight;
+
+    // Crée une nouvelle image aux dimensions calculées
+    $tmpImg = imagecreatetruecolor($targetWidth, $newHeight);
+
+    // Charge l'image source
+    $srcImg = imagecreatefromjpeg($src);
+
+    // Redimensionne l'image source en copiant sur l'image temporaire
+    imagecopyresampled($tmpImg, $srcImg, 0, 0, 0, 0, $targetWidth, $newHeight, $originalWidth, $originalHeight);
+
+    // Sauvegarde l'image temporaire dans le fichier destination
+    $success = imagejpeg($tmpImg, $dest);
+
+    // Libère la mémoire
+    imagedestroy($srcImg);
+    imagedestroy($tmpImg);
+
+    // Retourne le succès de l'opération
+    return $success;
+}
