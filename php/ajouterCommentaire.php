@@ -102,7 +102,8 @@ function traitement_commentaire($bd, $id) {
         return;
     }
     // ajouter le commentaire
-    $sql = 'INSERT INTO commentaire (coUsager, coDateRepas, coTexte, coDatePublication, coNote) VALUES (' . $id . ', "' . $_POST['dateRepas'] . '", "' . $_POST['commentaire'] . '" , "' . DATE_AUJOURDHUI . '", "' . $_POST['note'] . '" )';
+    $commentaire = mysqli_real_escape_string($_POST['commentaire'], $bd);
+    $sql = 'INSERT INTO commentaire (coUsager, coDateRepas, coTexte, coDatePublication, coNote) VALUES (' . $id . ', "' . $_POST['dateRepas'] . '", "' . $commentaire . '" , "' . DATE_AUJOURDHUI . '", "' . $_POST['note'] . '" )';
     $res = bdSendRequest($bd, $sql);
     if ($res === false) {
         echo '<p>Erreur lors de l\'ajout du commentaire</p>';
