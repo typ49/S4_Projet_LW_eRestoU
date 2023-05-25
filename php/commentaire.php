@@ -50,6 +50,11 @@ function ajouterCommentaire($bd, $id){
     while ($tab = mysqli_fetch_assoc($res)) {
         $date[] = $tab['reDate'];
     }
+    //vérifier si il y a des dates
+    if (count($date) == 0) {
+        echo '<p>Vous avez déjà commenté tous vos repas ou vous n\'avez pas commander de repas.</p>';
+        return;
+    }
     // afficher les dates de repas de l'utilisateur dans un select
     echo '<form action="#" method="post">',
     '<p><select name="dateRepas" id="dateRepas">';

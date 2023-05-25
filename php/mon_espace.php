@@ -390,7 +390,7 @@ function affDeconnexion(){
 }
 function affCommentaire() {
     echo "<h2> Vous avez un commentaire à nous faire ?</h2>",
-    "<section><a href=\"commentaire.php\" id=\"ajouter-commentaire\">Mon espace commentaire</a></section>";
+    "<section><a href=\"commentaire.php\" id=\"ajouter-commentaire\">Mes commentaire</a></section>";
 }
 
 function affMonEspace($erreursInfo, $erreursConnexion){
